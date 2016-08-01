@@ -59,7 +59,7 @@ SnapshotTrigger.prototype = {
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-31 07:11:09</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>677af8002b0d6a00b41b27b436da1591</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>SnapshotTrigger</sys_name>

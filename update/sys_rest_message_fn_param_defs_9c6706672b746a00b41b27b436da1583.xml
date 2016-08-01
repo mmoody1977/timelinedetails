@@ -7,7 +7,7 @@
         <sys_class_name>sys_rest_message_fn_param_defs</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-29 23:29:57</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>9c6706672b746a00b41b27b436da1583</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>sysparm_query</sys_name>

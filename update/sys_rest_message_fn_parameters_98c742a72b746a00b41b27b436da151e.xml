@@ -6,7 +6,7 @@
         <sys_class_name>sys_rest_message_fn_parameters</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-29 23:30:40</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>98c742a72b746a00b41b27b436da151e</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>instance</sys_name>

@@ -24,6 +24,7 @@ CreateSnapshotTable.prototype = {
         this.parser = new global.JSON();
         this.appModule = "4e412ef22b782a00b41b27b436da1529"; // Detailed Task Timelines left-nav app module
         this._createTaskTimeLineSI();
+        this._createGlobalScriptAction('Calculate SLA', 'x_milte_timedetail.calcsla');
     },
 
     _createTaskTimeLineSI: function () {
@@ -59,7 +60,7 @@ CreateSnapshotTable.prototype = {
 
     _insertGlobalScriptInclude: function () {
         //var scriptString = this._getScriptString();
-        // this._validateSIRESTFunctionContent();
+        this._validateSIRESTFunctionContent();
         try {
             var api = this.scopeName + '.sys_script_include';
             var r = new sn_ws.RESTMessageV2(api, 'post');
@@ -1513,8 +1514,6 @@ createAPIAccount: function () {
         }
     },
 
-
-
     getRandomPassword: function () {
         newpw = "";
         var availablechars = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -1525,44 +1524,6 @@ createAPIAccount: function () {
         // usr.user_password.setDisplayValue(newpw);
         return newpw;
     },
-
-
-
-
-
-    _getExistingLabels: function (tableName) {
-        var existingLabels = [];
-        var restMessage = this.scopeName + ".sys_documentation";
-        try {
-            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
-            // // r.setBasicAuth(this.apiUserName, this.apiPassword);
-            r.setStringParameter('instance', this.instanceName);
-            r.setStringParameter('fields', 'name,sys_id');
-            r.setStringParameter('query', 'name=' + tableName);
-            var response = r.execute();
-            var responseBody = response.getBody();
-            var httpStatus = response.getStatusCode();
-            gs.info("GET Labels httpStatus: " + httpStatus + " - responseBody: " + responseBody);
-            //var parser = new global.JSON();
-            if (httpStatus == "200") {
-                var parsed = this.parser.decode(responseBody);
-                for (var i = 0; i < parsed.result.length; i++) {
-                    if (String(parsed.result[i].name).indexOf(tableName) > -1) {
-                        existingLabels.push(String(parsed.result[i].sys_id));
-                    }
-                }
-            }
-            else {
-                gs.error("Unable to get existing labels " + tableName + " via " + restMessage + " httpStatus: " + httpStatus + " responseBody: " + responseBody);
-            }
-        }
-        catch (ex) {
-            gs.error("Unable to get existing labels " + tableName + " via " + restMessage + " API. Exception: " + ex.message);
-        }
-        return existingLabels;
-    },
-
-
 
     availableSourceTables: function (tableName) {
         var strQuery = 'sys_idIN';
@@ -1624,35 +1585,7 @@ createAPIAccount: function () {
     },
 
 
-    /*Delete functions*/
-    deleteTableLabels: function (tableName) {
-        var existingLabels = this._getExistingLabels(tableName);
-        if (!gs.nil(existingLabels) && existingLabels.length > 0) {
-            for (var i = 0; i < existingLabels.length; i++) {
-                var labelSid = existingLabels[i];
-                var restMessage = this.scopeName + ".sys_documentation";
-                try {
-                    var r = new sn_ws.RESTMessageV2(restMessage, 'delete');
-                    // // r.setBasicAuth(this.apiUserName, this.apiPassword);
-                    r.setStringParameter('instance', this.instanceName);
-                    r.setStringParameter('sys_id', labelSid);
-                    var response = r.execute();
-                    var responseBody = response.getBody();
-                    var httpStatus = response.getStatusCode();
-                    if (httpStatus == "204") {
-                        // Success
-                    }
-                    else {
-                        // Error deleting record via api
-                        gs.error("Unable to delete label " + labelSid + " via " + restMessage + " API. responseBody: " + responseBody);
-                    }
-                }
-                catch (ex) {
-                    gs.error("Unable to delete label " + labelSid + " via " + restMessage + " API. Exception: " + ex.message);
-                }
-            }
-        }
-    },
+
 
     deleteSLADefinition: function (tableName) {
         var gr = new GlideRecord('contract_sla');
@@ -1674,6 +1607,85 @@ createAPIAccount: function () {
         }
     },
 
+    _createGlobalScriptAction: function (name, event_name) {
+        if (!this._globalScriptActionExists(name, event_name)) {
+            this._validateGlobalScriptActionContent(event_name);
+            var restMessage = this.scopeName + ".sysevent_script_action";
+            try {
+                var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+                r.setStringParameter('instance', this.instanceName);
+                //r.setStringParameter('sequence', sequence);
+                r.setStringParameter('name', name);
+                r.setStringParameter('event_name', event_name);
+                r.setStringParameter('sys_scope', 'global');
+                var response = r.execute();
+                var responseBody = response.getBody();
+                var httpStatus = response.getStatusCode();
+                if (httpStatus == "201") {
+                    // Success
+                }
+                else {
+                    // Error deleting record via api
+                    gs.error("Unable to create Script Action: " + name + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+                }
+            }
+            catch (ex) {
+                var message = ex.getMessage();
+            }
+        }
+    },
+
+    _globalScriptActionExists: function (name, event_name) {
+        var exists = false;
+        var restMessage = this.scopeName + ".sysevent_script_action";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'sys_id');
+            r.setStringParameter('query', 'event_name=' + event_name);
+            r.setStringParameter('offset', '0');
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "200") {
+                if (String(responseBody).indexOf('sys_id') > -1) {
+                    exists = true;
+                }
+            }
+            else {
+                gs.error("Error getting sysevent_script_action via " + restMessage + " httpStatus: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            var message = ex.getMessage();
+            gs.error("Error getting sysevent_script_action via " + restMessage + " exception: " + message);
+        }
+        finally {
+            return exists;
+        }
+    },
+
+    _validateGlobalScriptActionContent: function (event_name) {
+        var content = '';
+        var funcSid = '';
+        switch (event_name) {
+            case 'x_milte_timedetail.calcsla':
+                content = '{"name":"${name}","event_name":"${event_name}","sys_scope":"${sys_scope}","active":"true","script":"calculateSLA(current); function calculateSLA(gr) { if (!gr.end_time.nil()) { global.SLACalculatorNG.calculateSLA(gr, false, gr.end_time); } else { global.SLACalculatorNG.calculateSLA(gr, false); } }"}';
+                funcSid = 'd5f564602b05aa00b41b27b436da155d';
+                break;
+            default:
+                break;
+        }
+       var gr = new GlideRecord('sys_rest_message_fn');
+        if (gr.get(funcSid)) {
+            if (gr.content != content) {
+                gr.content = content;
+                gr.update();
+            }
+        }
+    },
+
+
     type: 'CreateSnapshotTable'
 };
 ]]></script>
@@ -1682,7 +1694,7 @@ createAPIAccount: function () {
         <sys_created_on>2016-07-27 22:39:49</sys_created_on>
         <sys_customer_update>true</sys_customer_update>
         <sys_id>4178233a2bb82a00b41b27b436da1545</sys_id>
-        <sys_mod_count>13</sys_mod_count>
+        <sys_mod_count>17</sys_mod_count>
         <sys_name>CreateSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -1690,6 +1702,6 @@ createAPIAccount: function () {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_4178233a2bb82a00b41b27b436da1545</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-01 01:38:55</sys_updated_on>
+        <sys_updated_on>2016-08-01 23:54:20</sys_updated_on>
     </sys_script_include>
 </record_update>

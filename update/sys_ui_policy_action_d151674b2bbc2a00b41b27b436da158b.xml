@@ -7,7 +7,7 @@
         <sys_class_name>sys_ui_policy_action</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-28 16:45:05</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>d151674b2bbc2a00b41b27b436da158b</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>source_table</sys_name>

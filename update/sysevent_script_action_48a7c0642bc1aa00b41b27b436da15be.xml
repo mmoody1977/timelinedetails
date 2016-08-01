@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sysevent_script_action">
+    <sysevent_script_action action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition_script/>
+        <description/>
+        <event_name>x_milte_timedetail.create.choices</event_name>
+        <name>Create Choices for Snapshot Table</name>
+        <order>100</order>
+        <script><![CDATA[createChoices();
+function createChoices() {
+    var snapshotTblObj = new x_milte_timedetail.CreateSnapshotTable();
+    var newChoices = String(event.parm1);
+    var parsed = new global.JSON().decode(newChoices);
+    for (var choice in parsed) {
+        //  var jsonString = "{";
+        var name, label, value, element, sequence;
+        for (var prop in parsed[choice]) {
+            //if (jsonString == "{") {
+            //    jsonString += '"' + prop + '":"' + parsed[choice][prop] + '"';
+            //}
+            //else {
+            //    jsonString += ',"' + prop + '":"' + parsed[choice][prop] + '"';
+            //}
+            if (prop == "name") {
+                name = parsed[choice][prop];
+            }
+            if (prop == "label") {
+                label = parsed[choice][prop];
+            }
+            if (prop == "value") {
+                value = parsed[choice][prop];
+            }
+            if (prop == "element") {
+                element = parsed[choice][prop];
+            }
+            if (prop == "sequence") {
+                sequence = parsed[choice][prop];
+            }
+        }
+        //  jsonString += "}";
+        //  gs.info("JSONString: " + jsonString);
+        gs.info("createChoice params - name: " + name + " label: " + label + " value: " + value + " element: " + element + " sequence: " + sequence);
+        snapshotTblObj.createChoice(name, label, value, element, sequence);
+    }
+}
+]]></script>
+        <synchronous>false</synchronous>
+        <sys_class_name>sysevent_script_action</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-08-01 16:45:28</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>48a7c0642bc1aa00b41b27b436da15be</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Create Choices for Snapshot Table</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sysevent_script_action_48a7c0642bc1aa00b41b27b436da15be</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-08-01 16:45:28</sys_updated_on>
+    </sysevent_script_action>
+</record_update>

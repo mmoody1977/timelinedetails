@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <record_update table="sys_rest_message_fn">
     <sys_rest_message_fn action="INSERT_OR_UPDATE">
-        <authentication_type/>
-        <basic_auth_password/>
+        <authentication_type>basic_simple</authentication_type>
+        <basic_auth_password>rTyMgGtzZXF7MaSa+EyjGA==</basic_auth_password>
         <basic_auth_profile/>
-        <basic_auth_user/>
+        <basic_auth_user>x_milte_timedetail_api</basic_auth_user>
         <content/>
         <function_name>put</function_name>
         <lock>false</lock>
@@ -17,7 +17,7 @@
         <sys_created_on>2016-07-28 19:56:37</sys_created_on>
         <sys_customer_update>true</sys_customer_update>
         <sys_id>a93d4c572bfc2a00b41b27b436da150d</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>1</sys_mod_count>
         <sys_name>put</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy/>
@@ -25,8 +25,8 @@
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_rest_message_fn_a93d4c572bfc2a00b41b27b436da150d</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-07-28 19:56:37</sys_updated_on>
-        <use_basic_auth>false</use_basic_auth>
+        <sys_updated_on>2016-08-01 23:52:02</sys_updated_on>
+        <use_basic_auth>true</use_basic_auth>
         <use_mid_server/>
         <use_mutual_auth>false</use_mutual_auth>
     </sys_rest_message_fn>

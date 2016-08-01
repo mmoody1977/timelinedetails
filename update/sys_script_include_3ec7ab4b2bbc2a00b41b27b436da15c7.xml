@@ -84,9 +84,9 @@ DeleteSnapshotTable.prototype = {
 
     deleteChoices: function (snapshotTable) {
 
-       // gs.info("modified tablename: " + this.scopeName + "_");
+        // gs.info("modified tablename: " + this.scopeName + "_");
         snapshotTable = String(snapshotTable).replace(this.scopeName + "_", "");
-       // gs.info("snapshotTable: " + snapshotTable);
+        // gs.info("snapshotTable: " + snapshotTable);
         var gr = new GlideRecord('sys_db_object');
         gr.addQuery('name', this.scopeName + '_snapshot_table');
         gr.query();
@@ -94,7 +94,7 @@ DeleteSnapshotTable.prototype = {
             // gs.eventQueue(this.scopeName + ".delete.choices", gr, snapshotTable, null);
             var choices = this.getExistingChoices(this.scopeName + "_" + snapshotTable);
             for (var sid in choices) {
-               // gs.info("Choice sid: " + choices[sid]);
+                // gs.info("Choice sid: " + choices[sid]);
                 this.deleteChoice(choices[sid]);
             }
         }
@@ -149,6 +149,69 @@ DeleteSnapshotTable.prototype = {
                 gs.error("Error deleteing Module for " + tableName + " via " + restMessage + " API.");
             }
         }
+    },
+
+    /*Delete functions*/
+    deleteTableLabels: function (tableName) {
+        var existingLabels = this._getExistingLabels(tableName);
+        if (!gs.nil(existingLabels) && existingLabels.length > 0) {
+            for (var i = 0; i < existingLabels.length; i++) {
+                var labelSid = existingLabels[i];
+                var restMessage = this.scopeName + ".sys_documentation";
+                try {
+                    var r = new sn_ws.RESTMessageV2(restMessage, 'delete');
+                    // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+                    r.setStringParameter('instance', this.instanceName);
+                    r.setStringParameter('sys_id', labelSid);
+                    var response = r.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    if (httpStatus == "204") {
+                        // Success
+                    }
+                    else {
+                        // Error deleting record via api
+                        gs.error("Unable to delete label " + labelSid + " via " + restMessage + " API. responseBody: " + responseBody);
+                    }
+                }
+                catch (ex) {
+                    gs.error("Unable to delete label " + labelSid + " via " + restMessage + " API. Exception: " + ex.message);
+                }
+            }
+        }
+    },
+
+
+    _getExistingLabels: function (tableName) {
+        var existingLabels = [];
+        var restMessage = this.scopeName + ".sys_documentation";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'name,sys_id');
+            r.setStringParameter('query', 'name=' + tableName);
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            //gs.info("GET Labels httpStatus: " + httpStatus + " - responseBody: " + responseBody);
+            //var parser = new global.JSON();
+            if (httpStatus == "200") {
+                var parsed = this.parser.decode(responseBody);
+                for (var i = 0; i < parsed.result.length; i++) {
+                    if (String(parsed.result[i].name).indexOf(tableName) > -1) {
+                        existingLabels.push(String(parsed.result[i].sys_id));
+                    }
+                }
+            }
+            else {
+                gs.error("Unable to get existing labels " + tableName + " via " + restMessage + " httpStatus: " + httpStatus + " responseBody: " + responseBody);
+            }
+        }
+        catch (ex) {
+            gs.error("Unable to get existing labels " + tableName + " via " + restMessage + " API. Exception: " + ex.message);
+        }
+        return existingLabels;
     },
 
     _getExistingModule: function (tableName) {
@@ -258,7 +321,7 @@ DeleteSnapshotTable.prototype = {
         <sys_created_on>2016-07-28 17:42:16</sys_created_on>
         <sys_customer_update>true</sys_customer_update>
         <sys_id>3ec7ab4b2bbc2a00b41b27b436da15c7</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>1</sys_mod_count>
         <sys_name>DeleteSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -266,6 +329,6 @@ DeleteSnapshotTable.prototype = {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_3ec7ab4b2bbc2a00b41b27b436da15c7</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-07-28 17:42:16</sys_updated_on>
+        <sys_updated_on>2016-08-01 16:33:35</sys_updated_on>
     </sys_script_include>
 </record_update>

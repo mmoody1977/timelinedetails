@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <record_update table="sys_rest_message_fn">
     <sys_rest_message_fn action="INSERT_OR_UPDATE">
-        <authentication_type/>
-        <basic_auth_password/>
+        <authentication_type>basic_simple</authentication_type>
+        <basic_auth_password>rTyMgGtzZXF7MaSa+EyjGA==</basic_auth_password>
         <basic_auth_profile/>
-        <basic_auth_user/>
+        <basic_auth_user>x_milte_timedetail_api</basic_auth_user>
         <content>{"label":"${label}","name":"${name}", "sys_scope":"${scope}","super_class":"${super_class}","create_access":true,"update_access":true,"delete_access":true, "create_access_controls":true,"user_role":"${user_role}"}</content>
         <function_name>post</function_name>
         <lock>true</lock>
@@ -17,7 +17,7 @@
         <sys_created_on>2016-07-28 19:47:10</sys_created_on>
         <sys_customer_update>true</sys_customer_update>
         <sys_id>5b0bc0172bfc2a00b41b27b436da15ff</sys_id>
-        <sys_mod_count>2</sys_mod_count>
+        <sys_mod_count>3</sys_mod_count>
         <sys_name>post</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy/>
@@ -25,8 +25,8 @@
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_rest_message_fn_5b0bc0172bfc2a00b41b27b436da15ff</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-07-28 19:50:47</sys_updated_on>
-        <use_basic_auth>false</use_basic_auth>
+        <sys_updated_on>2016-08-01 23:52:01</sys_updated_on>
+        <use_basic_auth>true</use_basic_auth>
         <use_mid_server/>
         <use_mutual_auth>false</use_mutual_auth>
     </sys_rest_message_fn>

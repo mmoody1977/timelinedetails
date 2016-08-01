@@ -51,8 +51,8 @@
         <sys_class_name>sys_dictionary</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-28 16:01:24</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
-        <sys_id>5ad6d7472bbc2a00b41b27b436da1532</sys_id>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>59baa5242b45aa00b41b27b436da15c4</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>Label</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
@@ -60,8 +60,8 @@
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_dictionary_x_milte_timedetail_deleted_snapshot_table_label</sys_update_name>
-        <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-07-28 16:01:24</sys_updated_on>
+        <sys_updated_by>system</sys_updated_by>
+        <sys_updated_on>2016-08-01 23:57:36</sys_updated_on>
         <table_reference>false</table_reference>
         <text_index>false</text_index>
         <unique>false</unique>
