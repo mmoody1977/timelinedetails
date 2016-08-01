@@ -1,0 +1,1695 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_milte_timedetail.CreateSnapshotTable</api_name>
+        <client_callable>false</client_callable>
+        <description>Used by Timeline Details Application to create snapshot table records in the x_milte_timedetail.snapshot_definition table and a dedicated snapshot table in sys_db_object table.</description>
+        <name>CreateSnapshotTable</name>
+        <script><![CDATA[var CreateSnapshotTable = Class.create();
+CreateSnapshotTable.prototype = {
+    initialize: function () {
+        this.scope = '1e12c3a42be79640b41b27b436da15f2';
+        this.scopeName = 'x_milte_timedetail';
+        this.apiUserName = this.scopeName + "_api";
+        this.apiPassword = this.getRandomPassword();
+        this._validateCredentials(this.apiUserName, this.apiPassword);
+        gs.info("CREDS - apiUserName: " + this.apiUserName + " apiPassword: " + this.apiPassword);
+        var adminSid = this._createTTAdmin();
+        this._createTTAdminRoles(adminSid);
+        //this._setRESTCreds();
+        this.baseTaskTable = '8e5923614f320200ace84a318110c7c8';
+        this.instanceName = gs.getProperty('glide.servlet.uri');
+        this.parser = new global.JSON();
+        this.appModule = "4e412ef22b782a00b41b27b436da1529"; // Detailed Task Timelines left-nav app module
+        this._createTaskTimeLineSI();
+    },
+
+    _createTaskTimeLineSI: function () {
+        try {
+            var api = this.scopeName + '.sys_script_include';
+            var r = new sn_ws.RESTMessageV2(api, 'get');
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'sys_id');
+            r.setStringParameter('query', 'api_name=global.TaskTimeLine2');
+            r.setStringParameter('offset', '0');
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info("GET Choices httpStatus: " + httpStatus);
+            //var parser = new global.JSON();
+            if (httpStatus == "200") {
+                if (String(responseBody).indexOf('sys_id') > -1) {
+                    // Exists, do nothing.
+                }
+                else {
+                    // Insert the Script include
+                    this._insertGlobalScriptInclude();
+                }
+            }
+            else {
+                gs.error("Unable to get existing TaskTimeLine2 sys_script_include record due to httpStatus code failure: sys_script_include via: " + api + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            gs.error("Error encountered in _createTaskTimeLineSI: " + ex.message);
+        }
+    },
+
+    _insertGlobalScriptInclude: function () {
+        //var scriptString = this._getScriptString();
+        // this._validateSIRESTFunctionContent();
+        try {
+            var api = this.scopeName + '.sys_script_include';
+            var r = new sn_ws.RESTMessageV2(api, 'post');
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('sys_scope', this.scope);
+            r.setStringParameter('name', 'TaskTimeLine2');
+            r.setStringParameter('api_name', 'global.TaskTimeLine2');
+            r.setStringParameter('client_callable', 'true');
+            r.setStringParameter('description', 'Used by the Timeline Details application for rendering the Gantt Page for Timeline Details of snapshot records.');
+            r.setStringParameter('access', 'public');
+            //r.setStringParameter('script', scriptString);
+            var response = r.execute();
+            var k = 1;
+            while (response == null) {
+                response = r.getResponse(1000);
+                k++;
+                if (k > 300) {
+                    break;
+                }
+            }
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == '201') {
+                // Success
+            }
+            else {
+                gs.error("Unable to create new TaskTimeLine2 sys_script_include record due to httpStatus code failure: sys_script_include via: " + api + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            gs.error("Error encountered in _insertGlobalScriptInclude: " + ex.message);
+        }
+    },
+
+    _validateCredentials: function (apiUserName, apiPassword) {
+        var gr = new GlideRecord('x_milte_timedetail_rest_credential');
+        gr.addQuery('user_name', apiUserName);
+        gr.query();
+        if (gr.next()) {
+            //var encryptedPword = gr.password;
+            //var Encrypter = new global.GlideEncrypter();
+            //this.apiPassword = Encrypter.decrypt(encryptedPword);
+            this.apiPassword = gr.password.getDecryptedValue();
+            if (!this._restPasswordMatches(this.apiPassword)) {
+                this._setRESTCreds();
+            }
+        }
+        else {
+            gr.initialize();
+            gr.name = apiUserName;
+            gr.user_name = apiUserName;
+            gr.password = apiPassword;
+            gr.applies_to = 'rest_message';
+            gr.insert();
+            this._setRESTCreds();
+        }
+    },
+
+    _restPasswordMatches: function (apiPassword) {
+        var matches = true;
+        var gr = new GlideRecord('sys_rest_message_fn');
+        var query = "sys_scope=" + this.scope;
+        gr.addEncodedQuery(query);
+        while (gr.next()) {
+            var decryptedPword = gr.basic_auth_password.getDecryptedValue();
+            if (apiPassword != decryptedPword) {
+                matches = false;
+            }
+        }
+        return matches;
+    },
+
+    _setRESTCreds: function () {
+        var gr = new GlideRecord("sys_rest_message_fn");
+        var query = "sys_scope=" + this.scope;
+        gr.addEncodedQuery(query);
+        gr.query();
+        while (gr.next()) {
+            gr.use_basic_auth = true;
+            gr.basic_auth_user = this.scopeName + "_api";
+            //var Encrypter = new global.GlideEncrypter();
+            //var password = Encrypter.decrypt(String(gr.basic_auth_password));
+            //if (password != this.apiPassword) {
+            //gs.info("PASSWORDS not equal! existing: " + password + " new: " + this.apiPassword);
+            gr.basic_auth_password.setDisplayValue(this.apiPassword);
+            //}
+            gr.update();
+        }
+    },
+
+    _getExistingAPIPassword: function (apiUserName) {
+        var password = "";
+        var gr = new GlideRecord("basic_auth_credentials");
+        gr.addQuery("user_name", apiUserName);
+        gr.query();
+        if (gr.next()) {
+            var Encrypter = new global.GlideEncrypter();
+            password = Encrypter.decrypt(String(gr.password));
+        }
+        else {
+            // Create Record and return password:
+            gr.initialize();
+            gr.name = apiUserName;
+            gr.user_name = apiUserName;
+            password = this.getRandomPassword();
+            gr.password.setDisplayValue(password);
+            gr.insert();
+        }
+        return password;
+    },
+
+    _createTTAdmin: function () {
+        var userSid = "";
+        var gr = new GlideRecord('sys_user');
+        gr.addQuery('user_name', this.scopeName + '_api');
+        gr.query();
+        if (gr.next()) {
+            gr.user_password.setDisplayValue(this.apiPassword);
+            gr.web_service_access_only = true;
+            gr.first_name = 'Timeline Details';
+            gr.last_name = 'API Admin';
+            gr.active = true;
+            gr.update();
+            userSid = String(gr.sys_id);
+        }
+        else {
+            gr.initialize();
+            gr.user_name = this.scopeName + '_api';
+            gr.user_password.setDisplayValue(this.apiPassword);
+            gr.web_service_access_only = true;
+            gr.first_name = 'Timeline Details';
+            gr.last_name = 'API Admin';
+            gr.active = true;
+            userSid = gr.insert();
+        }
+        return userSid;
+    },
+
+    /*
+createAPIAccount: function () {
+    var userCreds = { user_name: this.scopeName + '_api', user_password: this.getRandomPassword() };
+    var api_user = new GlideRecord('sys_user');
+    api_user.addQuery('user_name', userCreds.user_name);
+    api_user.query();
+    if (api_user.next()) {
+        var sid = String(api_user.sys_id);
+        api_user.user_password.setDisplayValue(userCreds.user_password);
+        api_user.active = true;
+        api_user.web_service_access_only = true;
+        //api_user.internal_integration_user = true;
+        api_user.update();
+        this.grantPersonalizeRole(sid);
+    }
+    else {
+        api_user.initialize();
+        api_user.user_name = userCreds.user_name;
+        api_user.user_password.setDisplayValue(userCreds.user_password);
+        api_user.active = true;
+        api_user.web_service_access_only = true;
+        //api_user.internal_integration_user = true;
+        var sid = api_user.insert();
+        this.grantPersonalizeRole(sid);
+    }
+
+    return userCreds;
+},
+*/
+
+    _createTTAdminRoles: function (adminSid) {
+        var gr = new GlideRecord('sys_user_has_role');
+        gr.addQuery('user', adminSid);
+        gr.addQuery('role', '3dfd67229f22110041a496fcc67fcf6c'); // rest_service
+        gr.query();
+        if (gr.next()) { }
+        else {
+            gr.initialize();
+            gr.user = adminSid;
+            gr.role = '3dfd67229f22110041a496fcc67fcf6c';
+            gr.insert();
+        }
+        var gr2 = new GlideRecord('sys_user_has_role');
+        gr2.addQuery('user', adminSid);
+        gr2.addQuery('role', 'ddff3bfbc61122c20129a55989cda449'); // Personalize
+        gr2.query();
+        if (gr2.next()) { }
+        else {
+            gr2.initialize();
+            gr2.user = adminSid;
+            gr2.role = 'ddff3bfbc61122c20129a55989cda449';
+            gr2.insert();
+        }
+
+        var gr3 = new GlideRecord('sys_user_has_role');
+        gr3.addQuery('user', adminSid);
+        gr3.addQuery('role', '2831a114c611228501d4ea6c309d626d'); // Admin
+        gr3.query();
+        if (gr3.next()) { }
+        else {
+            gr3.initialize();
+            gr3.user = adminSid;
+            gr3.role = '2831a114c611228501d4ea6c309d626d';
+            gr3.insert();
+        }
+
+    },
+
+    createSnapshotTable: function (tableLabel, sourceTableName) {
+        var tableName = String(tableLabel).toLowerCase();
+        var exp = new RegExp(" ", "jg");
+        tableName = tableName.replace(exp, "_");
+        //tableName = "u_" + tableName;
+        try {
+            var api = this.scopeName + '.sys_db_object';
+            // gs.info('api: ' + api + ' instance: ' + this.instanceName + ' scope: ' + this.scope + ' super_class: ' + this.baseTaskTable + ' label: ' + tableLabel + ' name: ' + tableName);
+            var r = new sn_ws.RESTMessageV2(api, 'post');
+            //// r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('scope', this.scope);
+            r.setStringParameter('super_class', this.baseTaskTable);
+            r.setStringParameter('label', tableLabel);
+            r.setStringParameter('name', tableName);
+            var roleSid = this.createTableRole(tableName + "_admin", tableName);
+            // gs.info('user_role: ' + roleSid);
+            r.setStringParameter('user_role', roleSid);
+            var response = r.execute();
+            var k = 1;
+            while (response == null) {
+                response = r.getResponse(1000);
+                k++;
+                if (k > 300) {
+                    break;
+                }
+            }
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            // gs.info('status code: ' + httpStatus);
+            //var parser = new global.JSON();
+            var parsed = this.parser.decode(responseBody);
+
+            var tableSid = parsed.result.sys_id;
+            //gs.info("tableSid: " + mydata.result.sys_id);
+            this.createSnapshotColumns(tableName, sourceTableName);
+            //this.createSnapshotColumns_old(tableName, sourceTableName);
+            this.createTableModule(tableName, tableLabel);
+            this.createTableSLA(tableName, tableLabel);
+            //this.createDefaultTableView(tableName, sourceTableName);
+            this.createTableView(tableName, sourceTableName);
+            this.createChoices(sourceTableName, tableName);
+            return tableSid;
+        }
+        catch (ex) {
+            var message = ex.message;
+            gs.error(message);
+        }
+    },
+
+    createSnapshotColumns: function (tableName, sourceTableName) {
+        // Get Source Table Label
+        var sourceTableLabel = "";
+        var sourceTable = new GlideRecord('sys_db_object');
+        sourceTable.addQuery('name', sourceTableName);
+        sourceTable.query();
+        if (sourceTable.next()) {
+            sourceTableLabel = sourceTable.label;
+        }
+
+
+        // Create Reference field to source table record
+        this.createColumn(tableName, String(sourceTableLabel), String(sourceTableName), "reference", String(sourceTableName));
+        // Create Snapshot Created Trigger field
+        this.createColumn(tableName, "Snapshot Created Trigger", "snapshot_created_trigger", "string", null);
+        // Create Snapshot Completed Trigger field
+        this.createColumn(tableName, "Snapshot Completed Trigger", "snapshot_completed_trigger", "string", null);
+        // Create Snapshot Triggered at field
+        this.createColumn(tableName, "Snapshot Triggered At", "snapshot_triggered_at", "glide_date_time", null);
+        // Create Snapshot SLA Complete field
+        this.createColumn(tableName, "Snapshot SLA Complete", "snapshot_sla_complete", "boolean", false);
+    },
+
+    createSnapshotColumns_old: function (tableName, sourceTableName) {
+        try {
+            //var api = this.scopeName + '.CreateColumn';
+            // Get Source Table Label
+            var sourceTableLabel = "";
+            var sourceTable = new GlideRecord('sys_db_object');
+            sourceTable.addQuery('name', sourceTableName);
+            sourceTable.query();
+            if (sourceTable.next()) {
+                sourceTableLabel = sourceTable.label;
+            }
+            gs.info('tableName: ' + tableName + " | sourceTableName: " + sourceTableName + " | sourceTableLabel: " + sourceTableLabel);
+            // Create Reference Field to Source table
+            var newTableColumn = new GlideRecord('sys_dictionary');
+            newTableColumn.name = String(tableName); // New Table where field is being created
+            newTableColumn.column_label = String(sourceTableLabel); // Field Label
+            newTableColumn.element = String(sourceTableName); // Field Name        
+            newTableColumn.internal_type = "reference";
+            newTableColumn.reference = String(sourceTableName);
+            newTableColumn.read_only = true;
+            newTableColumn.sys_scope = this.scope;
+
+            //newTableColumn.setWorkflow(false);
+            var colSid = newTableColumn.insert();
+            gs.info("colSid: " + colSid);
+            // Create Snapshot Trigger Fields
+            var snapshotCreatedTrigger = new GlideRecord('sys_dictionary');
+            snapshotCreatedTrigger.name = String(tableName);
+            snapshotCreatedTrigger.column_label = "Snapshot Created Trigger";
+            snapshotCreatedTrigger.element = "snapshot_created_trigger";
+            snapshotCreatedTrigger.internal_type = "string";
+            snapshotCreatedTrigger.max_length = 10000;
+            snapshotCreatedTrigger.read_only = true;
+            snapshotCreatedTrigger.sys_scope = this.scope;
+
+            // snapshotCreatedTrigger.setWorkflow(false);
+            snapshotCreatedTrigger.insert();
+
+            var snapshotCompletedTrigger = new GlideRecord('sys_dictionary');
+            snapshotCompletedTrigger.name = String(tableName);
+            snapshotCompletedTrigger.column_label = "Snapshot Completed Trigger";
+            snapshotCompletedTrigger.element = "snapshot_completed_trigger";
+            snapshotCompletedTrigger.internal_type = "string";
+            snapshotCompletedTrigger.max_length = 10000;
+            snapshotCompletedTrigger.read_only = true;
+            snapshotCompletedTrigger.sys_scope = this.scope;
+
+            //snapshotCompletedTrigger.setWorkflow(false);
+            snapshotCompletedTrigger.insert();
+
+            var snapshotCompletedTrigger = new GlideRecord('sys_dictionary');
+            snapshotCompletedTrigger.name = String(tableName);
+            snapshotCompletedTrigger.column_label = "Snapshot Triggered At";
+            snapshotCompletedTrigger.element = "snapshot_triggered_at";
+            snapshotCompletedTrigger.internal_type = "glide_date_time";
+            //snapshotCompletedTrigger.max_length = 10000;
+            snapshotCompletedTrigger.read_only = true;
+            snapshotCompletedTrigger.sys_scope = this.scope;
+
+            //snapshotCompletedTrigger.setWorkflow(false);
+            snapshotCompletedTrigger.insert();
+
+
+            // Create Snapshot SLA Complete Field
+            var snapshotSlaComplete = new GlideRecord('sys_dictionary');
+            snapshotSlaComplete.name = String(tableName);
+            snapshotSlaComplete.column_label = "Snapshot SLA Complete";
+            snapshotSlaComplete.element = "snapshot_sla_complete";
+            snapshotSlaComplete.internal_type = "boolean";
+            snapshotSlaComplete.default_value = false;
+            snapshotSlaComplete.read_only = true;
+            snapshotSlaComplete.sys_scope = this.scope;
+
+            //snapshotSlaComplete.setWorkflow(false);
+            snapshotSlaComplete.insert();
+        }
+        catch (err) {
+            gs.info("createSnapshotColumns_old Error: " + err.message);
+        }
+    },
+
+    createColumn: function (tableName, columnLabel, columnName, columnType, defaultValue) {
+        try {
+            gs.info('Creating column ' + columnLabel + ' with vars - tableName: ' + tableName + ' columnName: ' + columnName + ' columnType: ' + columnType + ' defaultValue: ' + defaultValue);
+            var api = this.scopeName + '.sys_dictionary';
+            var r = new sn_ws.RESTMessageV2(api, 'post');
+            // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter("name", String(tableName));
+            r.setStringParameter("column_label", String(columnLabel));
+            r.setStringParameter("element", String(columnName));
+            r.setStringParameter("internal_type", String(columnType));
+            r.setStringParameter("read_only", true);
+            r.setStringParameter("sys_scope", this.scope);
+            r.setStringParameter("default_value", "");
+            r.setStringParameter("max_length", 32);
+            if (!gs.nil(defaultValue)) {
+                if (columnType == 'reference') {
+                    r.setStringParameter("reference", defaultValue);
+                }
+                else {
+                    r.setStringParameter("default_value", defaultValue);
+                }
+            }
+            if (columnType == 'string') {
+                r.setStringParameter('max_length', 10000);
+            }
+            var response = r.execute();
+            var k = 1;
+            while (response == null) {
+                response = r.getResponse(1000);
+                k++;
+                if (k > 300) {
+                    break;
+                }
+            }
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info('httpStatus: ' + httpStatus);
+            gs.info('responseBody: ' + responseBody);
+            gs.debug(responseBody);
+        }
+        catch (err) {
+            gs.error('Error: ' + err.message);
+        }
+    },
+
+    createTableColumns: function (tableName, sourceTableName) {
+        try {
+            var sourceTable = new GlideRecord('sys_db_object');
+            sourceTable.addQuery('name', sourceTableName);
+            sourceTable.query();
+            if (sourceTable.next()) {
+                var columnsToReplicate = new GlideRecord('sys_dictionary');
+                columnsToReplicate.addNotNullQuery('element');
+                columnsToReplicate.addQuery('name', sourceTable.name);
+                columnsToReplicate.query();
+                while (columnsToReplicate.next()) {
+                    if (String(columnsToReplicate.element).indexOf('sys_') > -1 || String(columnsToReplicate.element) == "parent") { }
+                    else {
+                        var newTableColumn = new GlideRecord('sys_dictionary');
+                        for (var prop in columnsToReplicate) {
+                            if (String(prop).indexOf('sys_') > -1 || String(prop) == 'parent' || String(prop) == 'name' || String(prop) == 'sys_scope') { }
+                            else {
+                                newTableColumn[prop] = columnsToReplicate[prop];
+                            }
+                        }
+                        newTableColumn.name = tableName;
+                        newTableColumn.read_only = true;
+                        newTableColumn.sys_scope = this.scope; // Detailed Task Timelines
+                        newTableColumn.insert();
+                    }
+                }
+                if (!sourceTable.super_class.nil() && sourceTable.super_class != '8e5923614f320200ace84a318110c7c8') { // && sourceTable.super_class != '8e5923614f320200ace84a318110c7c8'
+                    this.createTableColumns(tableName, sourceTable.super_class.name);
+                }
+            }
+        }
+        catch (err) {
+            gs.log("Encountered Error creating Table Columns: " + err.message, 'BR');
+        }
+    },
+
+    createTableRole: function (role, tableName) {
+        var roleSid = "";
+        try {
+            var gr = new GlideRecord('sys_user_role');
+            gr.addQuery('name', role);
+            gr.query();
+            if (gr.next()) {
+                roleSid = String(gr.sys_id);
+                gs.info('Found Role: ' + roleSid);
+            }
+            else {
+                gr.initialize();
+                gr.name = role;
+                gr.description = "Auto generated Admin role for snapshot table: " + tableName;
+                gs.info('creating role: ' + role);
+                roleSid = gr.insert();
+                gs.info('created role: ' + roleSid);
+                roleSid = String(roleSid);
+                gs.info('stringed role: ' + roleSid);
+            }
+        }
+        catch (err) {
+            gs.error(err.message);
+        }
+        return roleSid;
+    },
+
+    grantTableRole: function (roleId, userId) {
+        var userHasRole = new GlideRecord('sys_user_has_role');
+        userHasRole.addQuery('user', userId);
+        userHasRole.addQuery('role', roleId);
+        userHasRole.query();
+        if (userHasRole.next()) { }
+        else {
+            userHasRole.initialize();
+            userHasRole.user = userId;
+            userHasRole.role = roleId;
+            userHasRole.insert();
+        }
+    },
+
+    createTableModule: function (tableName, tableLabel) {
+        /*
+        var highestOrder = 0;
+        var existingModules = new GlideRecord('sys_app_module');
+        existingModules.addQuery('application', this.appModule); // Detailed Task Timelines
+        existingModules.orderByDesc('order');
+        existingModules.query();
+        if (existingModules.next()) {
+            highestOrder = parseInt(existingModules.order);
+        }
+        highestOrder += 10;
+        var newModule = new GlideRecord('sys_app_module');
+        newModule.title = tableLabel;
+        newModule.application = this.appModule; // Detailed Task Timelines
+        newModule.link_type = "LIST"; // List of Records
+        newModule.name = tableName;
+        newModule.order = highestOrder;
+        newModule.sys_scope = this.scope; // Detailed Task Timelines
+        newModule.insert();
+        */
+        this._createModule(tableName, tableLabel);
+    },
+
+    _createModule: function (tableName, tableLabel) {
+        try {
+            var restMessage = this.scopeName + ".sys_app_module";
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('title', tableLabel);
+            r.setStringParameter('scope', this.scope);
+            r.setStringParameter('order', '200');
+            r.setStringParameter('name', this.scopeName + "_" + tableName);
+            r.setStringParameter('application', this.appModule);
+            r.setStringParameter('instance', this.instanceName);
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+        }
+        catch (ex) {
+            var message = ex.getMessage();
+        }
+    },
+
+
+
+
+
+    createTableSLA: function (tableName, tableLabel) {
+
+        gs.eventQueue(this.scopeName + ".createSnapshotSLA", null, tableName, tableLabel);
+        /*
+        // Add Type Choice Snapshot to contract_sla 
+        var choice = new GlideRecord('sys_choice');
+        choice.addQuery('name', 'contract_sla');
+        choice.addQuery('element', 'type');
+        choice.addQuery('value', 'Snapshot');
+        choice.query();
+        if (choice.next()) { }
+        else {
+            choice.initialize();
+            choice.name = 'contract_sla';
+            choice.element = 'type';
+            choice.value = 'Snapshot';
+            choice.insert();
+        }
+        // Add Snapshot SLA
+        var gr = new GlideRecord('contract_sla');
+        gr.addQuery('type', 'Snapshot');
+        gr.addQuery('collection', tableName);
+        gr.addQuery('start_condition', 'sys_idISNOTEMPTY');
+        gr.addQuery('stop_condition', 'snapshot_sla_complete=true');
+        gr.addQuery('sys_scope', this.scope);
+        gr.query();
+        if (gr.next()) { }
+        else {
+            gr.initialize();
+            gr.type = 'Snapshot';
+            gr.collection = tableName;
+            gr.name = tableLabel;
+            gr.start_condition = 'sys_idISNOTEMPTY';
+            gr.stop_condition = 'snapshot_sla_complete=true';
+            gr.workflow = 'NULL';
+            gr.duration.setDateNumericValue(43200000000); // = '1971-05-16 00:00:00'; // 500 days current.duration.setDateNumericValue(timems);
+            gr.retroactive = true;
+            gr.set_start_to = 'snapshot_triggered_at';
+            gr.sys_scope = this.scope; // Detailed Task Timelines
+            //gr.setWorkflow(false);
+            gr.insert();
+        }
+        */
+    },
+
+    createSLA: function (tableName, tableLabel) {
+        // Create SLA Choice Option
+        var restMessage = this.scopeName + ".sys_choice";
+        if (!this._slaChoiceExists()) {
+            try {
+                var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+                // r.setBasicAuth(this.apiUserName, this.apiPassword);
+                r.setStringParameter('instance', this.instanceName);
+                r.setStringParameter('sequence', "200");
+                r.setStringParameter('value', "Snapshot");
+                r.setStringParameter('label', "Snapshot");
+                r.setStringParameter('name', 'contract_sla');
+                r.setStringParameter('element', 'type');
+                var response = r.execute();
+                var responseBody = response.getBody();
+                var httpStatus = response.getStatusCode();
+                if (httpStatus == "201") {
+                    // Success
+                }
+                else {
+                    // Error deleting record via api
+                    gs.error("Unable to create choice: contract_sla Snapshot via: " + restMessage + " API. HTTP Status: " + httpStatus);
+                }
+            }
+            catch (ex) {
+                var message = ex.getMessage();
+            }
+        }
+
+        // Add Snapshot SLA
+        var restMessage = this.scopeName + ".contract_sla";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('type', 'Snapshot');
+            r.setStringParameter('collection', this.scopeName + "_" + tableName);
+            r.setStringParameter('name', tableLabel);
+            r.setStringParameter('start_condition', 'sys_idISNOTEMPTY');
+            r.setStringParameter('stop_condition', this.scopeName + '_snapshot_sla_complete=true^EQ');
+            r.setStringParameter('workflow', 'NULL');
+            r.setStringParameter('duration', '3000-05-16 00:00:00');
+            r.setStringParameter('retroactive', 'true');
+            r.setStringParameter('set_start_to', this.scopeName + '_snapshot_triggered_at');
+            r.setStringParameter('sys_scope', this.scope);
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "201") {
+                // Success
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to create contract_sla: " + tableLabel + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (ex) {
+
+        }
+
+    },
+
+    _slaChoiceExists: function () {
+        var exists = false;
+        var choices = [];
+        var restMessage = this.scopeName + ".sys_choice";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'name,element,sys_id');
+            r.setStringParameter('query', 'name=contract_sla^element=type^value=Snapshot');
+            r.setStringParameter('offset', '0');
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info("GET Choices httpStatus: " + httpStatus);
+            //var parser = new global.JSON();
+            if (httpStatus == "200") {
+                var parsed = this.parser.decode(responseBody);
+                for (var i = 0; i < parsed.result.length; i++) {
+                    if (String(parsed.result[i].name).indexOf('contract_sla') > -1) {
+                        choices.push(String(parsed.result[i].sys_id));
+                    }
+                }
+            }
+            else {
+                gs.error("Unable to get existing Snapshot choice sys_choice record on contract_sla table: " + tableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            gs.error("Error encountered in _slaChoiceExists: " + ex.message);
+        }
+        if (choices.length > 0) {
+            exists = true;
+        }
+        return exists;
+    },
+
+
+
+
+
+    createTableView: function (tableName, sourceTableName) {
+        gs.eventQueue(this.scopeName + ".createTableView", null, this.scopeName + "_" + tableName, sourceTableName);
+    },
+
+    _formExists: function (tableName) {
+        var exists = false;
+        var forms = [];
+        forms = this._getUIForm(tableName);
+        if (forms.length > 0) {
+            exists = true;
+        }
+        return exists;
+    },
+
+    _getUIForm: function (tableName) {
+        var forms = [];
+        var restMessage = this.scopeName + ".sys_ui_form";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+
+            r.setStringParameter("instance", this.instanceName);
+            r.setStringParameter("fields", "name,sys_id");
+            var query = "view=Default view^sys_scope=" + this.scope + "^name=" + tableName;
+            gs.info("_getUIForm query: " + query);
+            r.setStringParameter("query", query);
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "200") {
+                var parsed = this.parser.decode(responseBody);
+                for (var i = 0; i < parsed.result.length; i++) {
+                    if (String(parsed.result[i].name).indexOf(tableName) > -1) {
+                        forms.push(String(parsed.result[i].sys_id));
+                    }
+                }
+            }
+            else {
+                gs.error("Error getting sys_ui_form via " + restMessage + " httpStatus: " + httpStatus + " responseBody: " + responseBody);
+            }
+        }
+        catch (err) {
+            gs.error("Error calling REST API " + restMessage + " Exception: " + err.message);
+        }
+        return forms;
+    },
+
+    createView: function (tableName, sourceTableName) {
+        var sourceForm = new GlideRecord('sys_ui_form');
+        sourceForm.addQuery('name', sourceTableName);
+        sourceForm.addQuery('view', 'Default view');
+        sourceForm.query();
+        gs.info("sourceForm count: " + sourceForm.getRowCount());
+        if (sourceForm.next()) {
+            if (!this._formExists(tableName)) {
+                gs.info("sourceForm - POSTING sys_ui_form using tableName: " + tableName);
+                // Create Form and UI Form Sections
+                var restMessage = this.scopeName + ".sys_ui_form";
+                try {
+                    var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+                    r.setStringParameter("instance", this.instanceName);
+                    r.setStringParameter("name", tableName);
+                    r.setStringParameter("view", "Default view");
+                    r.setStringParameter("sys_scope", this.scope);
+                    var response = r.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    if (httpStatus == "201") {
+                        // Success
+                        var parsed = this.parser.decode(responseBody);
+                        var newFormSid = parsed.result.sys_id;
+                        // Create Form Sections
+                        gs.info("POST of sys_ui_form for " + tableName + " successful. Creating form Sections..");
+                        this._createFormSections(newFormSid, tableName, sourceTableName);
+                    }
+                    else {
+                        // Error deleting record via api
+                        gs.error("Unable to create sys_ui_form: " + tableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+                    }
+                }
+                catch (err) {
+                    gs.error("Error calling REST API " + restMessage + " Exception: " + err.message);
+                }
+            }
+        }
+        else {
+
+            // this.createUISection("", tableName, sourceTableName);
+            this._createUISect("", tableName, sourceTableName);
+        }
+        this._createRelatedList(this.scopeName + "_" + tableName);
+    },
+
+    _createFormSections: function (formSid, tableName, sourceTableName) {
+        var formSections = new GlideRecord('sys_ui_form_section');
+        // sys_ui_form.view=Default view^sys_ui_form.sys_scope=global^sys_ui_form.name=incident
+        //var query = "sys_ui_form.view=Default view^sys_ui_form.sys_scope=global^sys_ui_form.name=" + sourceTableName;
+        formSections.addQuery('sys_ui_form.name', sourceTableName);
+        formSections.addQuery('sys_ui_form.view', 'Default view');
+        formSections.addQuery('sys_ui_form.sys_scope', 'global');
+        formSections.query();
+        gs.info("formSections.getRowCount(): " + formSections.getRowCount() + " for table " + sourceTableName);
+        if (formSections.getRowCount() > 0) {
+            while (formSections.next()) {
+                var restMessage = this.scopeName + ".sys_ui_form_section";
+                try {
+                    var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+                    r.setStringParameter("instance", this.instanceName);
+                    r.setStringParameter("sys_ui_form", formSid);
+
+
+                    for (var prop in formSections) {
+                        if (String(prop) == "sys_ui_section") {
+                            var uiSect = this._createUISect(String(formSections[prop]), tableName, sourceTableName);
+                            r.setStringParameter("sys_ui_section", uiSect);
+                        }
+                        if (String(prop) == "position") {
+                            r.setStringParameter("position", formSections[prop]);
+                        }
+                    }
+
+                    var response = r.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    if (httpStatus == "201") {
+                        // Success
+                    }
+                    else {
+                        // Error deleting record via api
+                        gs.error("Unable to create sys_ui_form_section: " + sourceTableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+                    }
+                }
+                catch (err) {
+                    gs.error("Error executing REST call " + restMessage + " Exception: " + err.message);
+                }
+            }
+        }
+
+    },
+
+    createDefaultTableView: function (tableName, sourceTableName) {
+        var sourceForm = new GlideRecord('sys_ui_form');
+        sourceForm.addQuery('name', sourceTableName);
+        sourceForm.addQuery('view', 'Default view');
+        sourceForm.query();
+        gs.info("sourceForm count: " + sourceForm.getRowCount());
+        if (sourceForm.next()) {
+            // Create Form and UI Form Sections
+            var gr = new GlideRecord('sys_ui_form');
+            gr.initialize();
+            gr.name = tableName;
+            gr.view = 'Default view';
+            gr.sys_scope = this.scope;
+            var newFormSid = gr.insert();
+
+            // Create Form Sections
+            var formSections = new GlideRecord('sys_ui_form_section');
+            formSections.addQuery('sys_ui_form.name', sourceTableName);
+            formSections.addQuery('sys_ui_form.view', 'Default view');
+            formSections.addQuery('sys_ui_form.sys_scope', 'global');
+            formSections.query();
+            // gs.info('Source Table Sections: ' + formSections.getRowCount());
+            if (formSections.getRowCount() > 0) {
+                while (formSections.next()) {
+                    var copyFormSection = new GlideRecord('sys_ui_form_section');
+                    copyFormSection.initialize();
+                    for (var prop in formSections) {
+                        if (String(prop).indexOf('sys_') > -1 || String(prop) == 'parent' || String(prop) == 'sys_scope') { }
+                        else {
+                            copyFormSection[prop] = formSections[prop];
+                        }
+                    }
+                    copyFormSection.sys_ui_section = this.createUISection(String(formSections.sys_ui_section.sys_id), tableName, sourceTableName);
+                    copyFormSection.sys_ui_form = newFormSid; // Associate copy with new Form
+                    copyFormSection.insert();
+                }
+            }
+        }
+        else {
+            this.createUISection("", tableName, sourceTableName);
+        }
+        this.createRelatedList(tableName);
+    },
+
+    _createUISect: function (formSection, tableName, sourceTableName) {
+        var sid = '';
+        var existingSectionSid = formSection;
+        var mainSection = false;
+        var existingSection = new GlideRecord('sys_ui_section');
+        if (formSection != "") {
+            if (existingSection.get(formSection)) {
+                // Create copy via API
+                var restMessage = this.scopeName + ".sys_ui_section";
+                try {
+                    var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+                    r.setStringParameter("instance", this.instanceName);
+                    r.setStringParameter("name", tableName);
+                    r.setStringParameter("view", existingSection.view);
+                    r.setStringParameter("caption", existingSection.caption);
+                    r.setStringParameter("sys_scope", this.scope);
+                    if (existingSection.caption.nil()) {
+                        mainSection = true;
+                    }
+                    var response = r.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    if (httpStatus == "201") {
+                        // Success
+                        var parsed = this.parser.decode(responseBody);
+                        sid = parsed.result.sys_id;
+                    }
+                    else {
+                        // Error deleting record via api
+                        gs.error("Unable to create sys_ui_section: " + sourceTableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+                    }
+                }
+                catch (err) {
+                    gs.error("Error executing REST call " + restMessage + " Exception: " + err.message);
+                }
+            }
+        }
+        else {
+            existingSection.addQuery("name", sourceTableName);
+            existingSection.addQuery("view", "Default view");
+            existingSection.query();
+            if (existingSection.next()) {
+                existingSectionSid = String(existingSection.sys_id);
+                // Create copy via API
+                var restMessage = this.scopeName + ".sys_ui_section";
+                try {
+                    var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+                    r.setStringParameter("instance", this.instanceName);
+                    r.setStringParameter("name", tableName);
+                    r.setStringParameter("view", existingSection.view);
+                    r.setStringParameter("caption", existingSection.caption);
+                    r.setStringParameter("sys_scope", this.scope);
+                    if (existingSection.caption.nil()) {
+                        mainSection = true;
+                    }
+                    var response = r.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    if (httpStatus == "201") {
+                        // Success
+                        var parsed = this.parser.decode(responseBody);
+                        sid = parsed.result.sys_id;
+                    }
+                    else {
+                        // Error deleting record via api
+                        gs.error("Unable to create sys_ui_section: " + sourceTableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+                    }
+                }
+                catch (err) {
+                    gs.error("Error executing REST call " + restMessage + " Exception: " + err.message);
+                }
+            }
+        }
+        var newSectionSid = String(sid);
+
+        // Create Section Elements
+        //this.createSectionElements(existingSectionSid, newSectionSid, mainSection, sourceTableName);
+        this._createSectionElems(existingSectionSid, newSectionSid, mainSection, sourceTableName, tableName);
+        return String(sid);
+    },
+
+
+    _createSectionElems: function (existingSectionSid, newSectionSid, mainSection, sourceTableName, tableName) {
+        gs.info("Creating Section Elements... existingSectionSid: " + existingSectionSid + " newSectionSid: " + newSectionSid + " mainSection: " + mainSection + " sourceTableName: " + sourceTableName);
+        var existingSectionElements = new GlideRecord('sys_ui_element');
+        existingSectionElements.addQuery('sys_ui_section.sys_id', existingSectionSid);
+        existingSectionElements.query();
+        gs.info("existingSectionElements.getRowCount(): " + existingSectionElements.getRowCount());
+        // Debuggging
+        while (existingSectionElements.next()) {
+            // Create copy via API
+            gs.info("Creating Section Element copy...");
+            var position = parseInt(existingSectionElements["position"]) + 8;
+            this._createUIElement(String(existingSectionElements["element"]), String(position), String(existingSectionElements["type"]), String(newSectionSid), String(existingSectionElements["sys_ui_formatter"]));
+        }
+
+        if (mainSection == true) {
+            gs.info("Creating Section - mainSection == true");
+            // Create Elements for Snapshot fields
+            // Increment all Existing elements by 7
+            //this.incrementElements(8, newSectionSid);
+
+            // Create caption annotation
+            var captSid = this._createUIAnnotation("Snapshot Specific Fields", "863e446c0fd30000b12e6903cfe012ce"); // Type text
+            // Add annotation to the View
+            gs.info("Creating Section annotation");
+            this._createUIElement(captSid, 0, "annotation", newSectionSid, "");
+            gs.info("Creating Section additional Elements");
+            this._createUIElement(this.scopeName + "_" + sourceTableName, 1, "", newSectionSid, "");
+            this._createUIElement(this.scopeName + "_snapshot_created_trigger", 2, "", newSectionSid, "");
+            this._createUIElement(this.scopeName + "_snapshot_completed_trigger", 3, "", newSectionSid, "");
+            this._createUIElement(this.scopeName + "_snapshot_triggered_at", 4, "", newSectionSid, "");
+            this._createUIElement(this.scopeName + "_snapshot_sla_complete", 5, "", newSectionSid, "");
+
+            // Create Line Seperator Annotation
+            var lineSid = this._createUIAnnotation("", "a93fc8e00f530000b12e6903cfe012e6"); // Line Seperator
+
+            // Create Choice types for sys_ui_element table
+            var annotationExists = false;
+            var splitExists = false;
+            var bSplitExists = false;
+            var eSplitExists = false;
+            var types = this.getExistingChoices("sys_ui_element");
+            for (var i = 0; i < types.length; i++) {
+                if (types[i].element == "type") {
+                    if (types[i].value == "annotation") {
+                        annotationExists = true;
+                    }
+                    if (types[i].value == ".begin_split") {
+                        bSplitExists = true;
+                    }
+                    if (types[i].value == ".split") {
+                        splitExists = true;
+                    }
+                    if (types[i].value == ".end_split") {
+                        eSplitExists = true;
+                    }
+                }
+            }
+
+            if (!annotationExists) {
+                this.createChoice(tableName, "annotation", "annotation", "type", 0);
+            }
+
+            if (!bSplitExists) {
+                this.createChoice(tableName, ".begin_split", ".begin_split", "type", 1);
+            }
+
+            if (!splitExists) {
+                this.createChoice(tableName, ".split", ".split", "type", 2);
+            }
+
+            if (!eSplitExists) {
+                this.createChoice(tableName, ".end_split", ".end_split", "type", 3);
+            }
+
+            // Add annotation to the View
+            this._createUIElement(lineSid, 6, "annotation", newSectionSid, "");
+
+            // Add Begin Split
+            this._createUIElement(".begin_split", 7, ".begin_split", newSectionSid, "");
+        }
+    },
+    // a861ceb64f2a5200ace84a318110c70d
+    _createUIElement: function (element, position, type, sys_ui_section, sys_ui_formatter) {
+        var sid = "";
+        var restMessage = this.scopeName + ".sys_ui_element";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            r.setStringParameter("instance", this.instanceName);
+
+            r.setStringParameter("element", String(element));
+            r.setStringParameter("position", String(position));
+            r.setStringParameter("type", String(type));
+            r.setStringParameter("sys_ui_section", String(sys_ui_section));
+            r.setStringParameter("sys_ui_formatter", String(sys_ui_formatter));
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "201") {
+                // Success
+                var parsed = this.parser.decode(responseBody);
+                sid = parsed.result.sys_id;
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to create sys_ui_element: " + element + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (err) {
+            gs.error("Error executing REST call " + restMessage + " Exception: " + err.message);
+        }
+        return sid;
+    },
+
+    _createUIAnnotation: function (text, type) {
+        var sid = "";
+        var restMessage = this.scopeName + ".sys_ui_annotation";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            r.setStringParameter("instance", this.instanceName);
+
+            r.setStringParameter("text", String(text));
+            r.setStringParameter("type", String(type));
+
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "201") {
+                // Success
+                var parsed = this.parser.decode(responseBody);
+                sid = parsed.result.sys_id;
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to create sys_ui_annotation: " + text + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (err) {
+            gs.error("Error executing REST call " + restMessage + " Exception: " + err.message);
+        }
+        return sid;
+    },
+
+    _createRelatedList: function (tableName) {
+        // Create Related List/ID
+        var sid = "";
+        var restMessage = this.scopeName + ".sys_ui_related_list";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            r.setStringParameter("instance", this.instanceName);
+
+            r.setStringParameter("name", String(tableName));
+            r.setStringParameter("view", "Default view");
+            r.setStringParameter("sys_scope", String(this.scope));
+
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "201") {
+                // Success
+                var parsed = this.parser.decode(responseBody);
+                sid = parsed.result.sys_id;
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to create sys_ui_related_list: " + tableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (err) {
+            gs.error("Error executing REST call " + restMessage + " Exception: " + err.message);
+        }
+
+        // Add Task SLA table to Related List
+        var restMessage = this.scopeName + ".sys_ui_related_list_entry";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            r.setStringParameter("instance", this.instanceName);
+
+            r.setStringParameter("list_id", String(sid));
+            r.setStringParameter("position", "0");
+            r.setStringParameter("related_list", "task_sla.task");
+
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "201") {
+                // Success
+                // var parsed = this.parser.decode(responseBody);
+                // sid = parsed.result.sys_id;
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to create sys_ui_related_list_entry: " + tableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (err) {
+            gs.error("Error executing REST call " + restMessage + " Exception: " + err.message);
+        }
+
+        // return sid;
+    },
+
+    createUISection: function (formSection, tableName, sourceTableName) {
+        var sid = '';
+        var existingSectionSid = formSection;
+        var mainSection = false;
+        var existingSection = new GlideRecord('sys_ui_section');
+        if (formSection != "") {
+            if (existingSection.get(formSection)) {
+                var copySection = new GlideRecord('sys_ui_section');
+                copySection.initialize();
+                for (var prop in existingSection) {
+                    if (String(prop).indexOf('sys_') > -1 || String(prop) == 'parent' || String(prop) == 'sys_scope') { }
+                    else {
+                        copySection[prop] = existingSection[prop];
+                    }
+                }
+                copySection.sys_scope = this.scope;
+                copySection.name = tableName;
+                sid = copySection.insert();
+                if (existingSection.caption.nil()) {
+                    mainSection = true;
+                }
+            }
+        }
+        else {
+            existingSection.addQuery('name', sourceTableName);
+            existingSection.addQuery('view', 'Default view');
+            existingSection.query();
+            if (existingSection.next()) {
+                existingSectionSid = String(existingSection.sys_id);
+                var copySection = new GlideRecord('sys_ui_section');
+                copySection.initialize();
+                for (var prop in existingSection) {
+                    if (String(prop).indexOf('sys_') > -1 || String(prop) == 'parent' || String(prop) == 'sys_scope') { }
+                    else {
+                        copySection[prop] = existingSection[prop];
+                    }
+                }
+                copySection.sys_scope = this.scope;
+                copySection.name = tableName;
+                sid = copySection.insert();
+                if (existingSection.caption.nil()) {
+                    mainSection = true;
+                }
+            }
+        }
+
+        var newSectionSid = String(sid);
+
+        // Create Section Elements
+        this.createSectionElements(existingSectionSid, newSectionSid, mainSection, sourceTableName);
+
+        return String(sid);
+    },
+
+    createSectionElements: function (existingSectionSid, newSectionSid, mainSection, sourceTableName) {
+        var existingSectionElements = new GlideRecord('sys_ui_element');
+        existingSectionElements.addQuery('sys_ui_section', existingSectionSid);
+        existingSectionElements.query();
+        while (existingSectionElements.next()) {
+            var newSectionElement = new GlideRecord('sys_ui_element');
+            newSectionElement.initialize();
+            for (var prop in existingSectionElements) {
+                if (String(prop).indexOf('sys_') > -1 || String(prop) == 'parent' || String(prop) == 'sys_scope') { }
+                else {
+                    newSectionElement[prop] = existingSectionElements[prop];
+                }
+            }
+            newSectionElement.sys_ui_section = newSectionSid;
+            newSectionElement.insert();
+        }
+        if (mainSection == true) {
+            // Create Elements for Snapshot fields
+
+            // Increment all Existing elements by 7
+
+            this.incrementElements(8, newSectionSid);
+
+            // Create caption annotation
+            var captionAnnotation = new GlideRecord('sys_ui_annotation');
+            captionAnnotation.text = 'Snapshot Specific Fields';
+            captionAnnotation.type = '863e446c0fd30000b12e6903cfe012ce'; // Text
+            var captSid = captionAnnotation.insert();
+
+            // Add annotation to the View
+            var captionElement = new GlideRecord('sys_ui_element');
+            captionElement.initialize();
+            captionElement.element = captSid;
+            captionElement.position = 0;
+            captionElement.type = 'annotation';
+            captionElement.sys_ui_section = newSectionSid;
+            captionElement.insert();
+
+            var snapshotElement = new GlideRecord('sys_ui_element');
+            snapshotElement.initialize();
+            snapshotElement.element = sourceTableName;
+            snapshotElement.position = 1;
+            snapshotElement.sys_ui_section = newSectionSid;
+            snapshotElement.insert();
+
+            var snapshotElement1 = new GlideRecord('sys_ui_element');
+            snapshotElement1.initialize();
+            snapshotElement1.element = "snapshot_created_trigger";
+            snapshotElement1.position = 2;
+            snapshotElement1.sys_ui_section = newSectionSid;
+            snapshotElement1.insert();
+
+            var snapshotElement2 = new GlideRecord('sys_ui_element');
+            snapshotElement2.initialize();
+            snapshotElement2.element = "snapshot_completed_trigger";
+            snapshotElement2.position = 3;
+            snapshotElement2.sys_ui_section = newSectionSid;
+            snapshotElement2.insert();
+
+            var snapshotElement4 = new GlideRecord('sys_ui_element');
+            snapshotElement4.initialize();
+            snapshotElement4.element = "snapshot_triggered_at";
+            snapshotElement4.position = 4;
+            snapshotElement4.sys_ui_section = newSectionSid;
+            snapshotElement4.insert();
+
+            var snapshotElement5 = new GlideRecord('sys_ui_element');
+            snapshotElement5.initialize();
+            snapshotElement5.element = "snapshot_sla_complete";
+            snapshotElement5.position = 5;
+            snapshotElement5.sys_ui_section = newSectionSid;
+            snapshotElement5.insert();
+
+            // Create Line Seperator Annotation
+            var lineAnnotation = new GlideRecord('sys_ui_annotation');
+            //lineAnnotation.text = 'Snapshot Specific Fields';
+            lineAnnotation.type = 'a93fc8e00f530000b12e6903cfe012e6'; // Line Seperator
+            var lineSid = lineAnnotation.insert();
+
+            // Add annotation to the View
+            var lineElement = new GlideRecord('sys_ui_element');
+            lineElement.initialize();
+            lineElement.element = lineSid;
+            lineElement.position = 5;
+            lineElement.type = 'annotation';
+            lineElement.sys_ui_section = newSectionSid;
+            lineElement.insert();
+
+            // Add Begin Split
+            var splitElement = new GlideRecord('sys_ui_element');
+            splitElement.initialize();
+            splitElement.element = '.begin_split';
+            splitElement.type = '.begin_split';
+            splitElement.position = 6;
+            splitElement.sys_ui_section = newSectionSid;
+            splitElement.insert();
+
+        }
+    },
+
+    incrementElements: function (amount, newSectionSid) {
+        var existingSectionElements = new GlideRecord('sys_ui_element');
+        existingSectionElements.addQuery('sys_ui_section', newSectionSid);
+        existingSectionElements.query();
+        while (existingSectionElements.next()) {
+            existingSectionElements.position += amount;
+            existingSectionElements.update();
+        }
+    },
+
+    createRelatedList: function (tableName) {
+        // Create Related List ID
+        var gr = new GlideRecord('sys_ui_related_list');
+        gr.name = tableName;
+        gr.view = 'Default view';
+        gr.sys_scope = this.scope;
+        var listSid = gr.insert();
+
+        // Add Task SLA table to Related Lists
+        var relEntry = new GlideRecord('sys_ui_related_list_entry');
+        relEntry.list_id = listSid;
+        relEntry.position = 0;
+        relEntry.related_list = 'task_sla.task';
+        relEntry.insert();
+
+    },
+
+    createChoices: function (sourceTable, snapshotTable) {
+        var jsonArr = [];
+
+        var insert = false;
+        var gr = new GlideRecord('sys_choice');
+        gr.addQuery('name', sourceTable);
+        gr.query();
+        while (gr.next()) {
+            var json = "{";
+            var copyChoice = new GlideRecord('sys_choice');
+            copyChoice.addQuery('name', this.scopeName + "_" + snapshotTable);
+            copyChoice.addQuery('element', gr.element);
+            copyChoice.addQuery('value', gr.value);
+            copyChoice.addQuery('dependent_value', gr.dependent_value);
+            copyChoice.query();
+            if (copyChoice.next()) { /*Value Exists*/ }
+            else {
+                insert = true;
+                //copyChoice.initialize();
+                for (var prop in gr) {
+                    if ((String(prop).indexOf('domain') == -1 && String(prop).indexOf('sys_') > -1) || String(prop) == "parent" || String(prop) == "name") { }
+                    else {
+                        // copyChoice[prop] = gr[prop];
+                        if (json == '{') {
+                            if (!gr[prop].nil()) {
+                                json += '"' + prop + '":' + (new global.JSON().encode(String(gr[prop])));
+                            }
+                        }
+                        else {
+                            if (!gr[prop].nil()) {
+                                json += ',"' + prop + '":' + (new global.JSON().encode(String(gr[prop])));
+                            }
+                        }
+                    }
+                }
+                json += ',"name":"' + this.scopeName + "_" + snapshotTable + '"}';
+                jsonArr.push(json);
+                //copyChoice.name = snapshotTable;
+                //copyChoice.insert();
+            }
+        }
+
+        var jsonString = '[' + jsonArr.toString() + ']';
+        gs.eventQueue(this.scopeName + ".create.choices", current, jsonString, null);
+    },
+
+    createChoice: function (name, label, value, element, sequence) {
+        var restMessage = this.scopeName + ".sys_choice";
+        //try {
+
+
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('sequence', sequence);
+            r.setStringParameter('value', value);
+            r.setStringParameter('label', label);
+            r.setStringParameter('name', name);
+            r.setStringParameter('element', element);
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "201") {
+                // Success
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to create choice: " + json + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            var message = ex.getMessage();
+        }
+
+    },
+
+    getExistingChoices: function (snapshotTableName) {
+        var choices = [];
+        var restMessage = this.scopeName + ".sys_choice";
+        try {
+            gs.info("GET Choices params - instance: " + this.instanceName + " | query: name=" + snapshotTableName);
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            //// r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'name,element,sys_id,value');
+            r.setStringParameter('query', 'name=' + snapshotTableName);
+            r.setStringParameter('offset', '0');
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info("GET Choices httpStatus: " + httpStatus);
+            //var parser = new global.JSON();
+            if (httpStatus == "200") {
+                var parsed = this.parser.decode(responseBody);
+                for (var i = 0; i < parsed.result.length; i++) {
+                    if (String(parsed.result[i].name).indexOf('snapshot') > -1) {
+                        choices.push(String(parsed.result[i].sys_id));
+                    }
+                }
+            }
+            else {
+                gs.error("Error getting sys_choices via " + restMessage + " httpStatus: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            var message = ex.getMessage();
+            gs.error("Error getting sys_choices via " + restMessage + " exception: " + message);
+        }
+        gs.info("choices: " + choices.toString());
+        return choices;
+    },
+
+
+
+    grantPersonalizeRole: function (userSid) {
+        var gr = new GlideRecord('sys_user_has_role');
+        gr.addQuery('user', userSid);
+        gr.addQuery('role', 'ddff3bfbc61122c20129a55989cda449'); // Personalize
+        gr.query();
+        if (gr.next()) { }
+        else {
+            gr.initialize();
+            gr.user = userSid;
+            gr.role = 'ddff3bfbc61122c20129a55989cda449'; // Personalize
+            gr.insert();
+        }
+    },
+
+
+
+    getRandomPassword: function () {
+        newpw = "";
+        var availablechars = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        for (var x = 0; x < 8; x++) {
+            randomNumber = Math.floor(Math.random() * availablechars.length);
+            newpw += availablechars[randomNumber];
+        }
+        // usr.user_password.setDisplayValue(newpw);
+        return newpw;
+    },
+
+
+
+
+
+    _getExistingLabels: function (tableName) {
+        var existingLabels = [];
+        var restMessage = this.scopeName + ".sys_documentation";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'name,sys_id');
+            r.setStringParameter('query', 'name=' + tableName);
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info("GET Labels httpStatus: " + httpStatus + " - responseBody: " + responseBody);
+            //var parser = new global.JSON();
+            if (httpStatus == "200") {
+                var parsed = this.parser.decode(responseBody);
+                for (var i = 0; i < parsed.result.length; i++) {
+                    if (String(parsed.result[i].name).indexOf(tableName) > -1) {
+                        existingLabels.push(String(parsed.result[i].sys_id));
+                    }
+                }
+            }
+            else {
+                gs.error("Unable to get existing labels " + tableName + " via " + restMessage + " httpStatus: " + httpStatus + " responseBody: " + responseBody);
+            }
+        }
+        catch (ex) {
+            gs.error("Unable to get existing labels " + tableName + " via " + restMessage + " API. Exception: " + ex.message);
+        }
+        return existingLabels;
+    },
+
+
+
+    availableSourceTables: function (tableName) {
+        var strQuery = 'sys_idIN';
+        var sourceTablesInUseArr = [];
+        var availableTables = [];
+        var gr = new GlideRecord(tableName);
+        gr.query();
+        while (gr.next()) {
+            var sourceSid = String(gr.source_table.sys_id);
+            if (sourceTablesInUseArr.toString().indexOf(sourceSid) > -1) { }
+            else {
+                sourceTablesInUseArr.push(sourceSid);
+            }
+        }
+        //gs.info('sourceTablesInUse: ' + sourceTablesInUseArr.toString());
+        var tables = new GlideRecord('sys_db_object');
+        var sourceTablesInUse = sourceTablesInUseArr.toString();
+        tables.addQuery('sys_id', 'NOT IN', sourceTablesInUse);
+        tables.query();
+        while (tables.next()) {
+            var tableSid = String(tables.sys_id);
+            if (availableTables.toString().indexOf(tableSid) > -1) { }
+            else {
+                availableTables.push(tableSid);
+            }
+        }
+        //gs.info('Available Tables: ' + availableTables.toString());
+        return strQuery += availableTables.toString();
+    },
+
+    updateSLACalculation: function (ss_sid, event) {
+        var slaGR;
+        var gr = new GlideRecord('task_sla');
+        gr.addQuery('task', ss_sid);
+        gr.query();
+        if (gr.next()) {
+            gr.end_time = event.sys_created_on;
+            var grSid = String(gr.sys_id);
+            gr.update();
+            var sla = new GlideRecord('task_sla');
+            if (sla.get(grSid)) {
+                //this.runSLACalculation(sla);
+                slaGR = sla;
+            }
+        }
+        return slaGR;
+    },
+
+    runSLACalculation: function (gr) {
+        //If the SLA has already ended, set now to the end time so the calculation doesn't get messed up
+        //gs.info('typeof(gr): ' + typeof (gr));
+        if (!gr.end_time.nil()) {
+            //gs.info('typeof(SLACalculatorNG:): ' + typeof (SLACalculatorNG));
+            global.SLACalculatorNG.calculateSLA(gr, /* skipUpdate */ false, gr.end_time);
+        }
+        else {
+            global.SLACalculatorNG.calculateSLA(gr, /* skupUpdate */ false);
+        }
+    },
+
+
+    /*Delete functions*/
+    deleteTableLabels: function (tableName) {
+        var existingLabels = this._getExistingLabels(tableName);
+        if (!gs.nil(existingLabels) && existingLabels.length > 0) {
+            for (var i = 0; i < existingLabels.length; i++) {
+                var labelSid = existingLabels[i];
+                var restMessage = this.scopeName + ".sys_documentation";
+                try {
+                    var r = new sn_ws.RESTMessageV2(restMessage, 'delete');
+                    // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+                    r.setStringParameter('instance', this.instanceName);
+                    r.setStringParameter('sys_id', labelSid);
+                    var response = r.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    if (httpStatus == "204") {
+                        // Success
+                    }
+                    else {
+                        // Error deleting record via api
+                        gs.error("Unable to delete label " + labelSid + " via " + restMessage + " API. responseBody: " + responseBody);
+                    }
+                }
+                catch (ex) {
+                    gs.error("Unable to delete label " + labelSid + " via " + restMessage + " API. Exception: " + ex.message);
+                }
+            }
+        }
+    },
+
+    deleteSLADefinition: function (tableName) {
+        var gr = new GlideRecord('contract_sla');
+        gr.addQuery('collection', tableName);
+        gr.query();
+        while (gr.next()) {
+            gr.deleteRecord();
+        }
+    },
+
+    _validateSIRESTFunctionContent: function () {
+        var newContent = '{"name":"${name}","api_name":"${api_name}","client_callable":"${client_callable}","description":"${description}","script":"var TimelineItem = GlideTimelineItem; var StringUtil = GlideStringUtil; Array.prototype.map = function (func) { var newArray = []; for (var i = 0; i < this.length; i++) { newArray.push(func(this[i])); } return newArray; }; Array.prototype.filter = function (fun) { \'use strict\'; if (this === void 0 || this === null) { throw new TypeError(); } var t = Object(this); var len = t.length >>> 0; if (typeof fun !== \'function\') { throw new TypeError(); } var res = []; var thisArg = arguments.length >= 2 ? arguments[1] : void 0; for (var i = 0; i < len; i++) { if (i in t) { var val = t[i]; if (fun.call(thisArg, val, i, t)) { res.push(val); } } } return res; }; var TaskTimeLine2 = Class.create(); TaskTimeLine2.prototype = Object.extendsObject(AbstractTimelineSchedulePage, { getItems: function () { var taskID = this.getParameter(\"sysparm_timeline_task_id\"); var table = this.getParameter(\"sysparm_timeline_table\"); var sourceTable = table; var multipleTasks = { ticketNumbers: [], processingMultiple: false }; this.setPageTitle(table + \" Timeline\"); if (String(taskID).indexOf(\',\') > -1) { var tasks = String(taskID).split(\',\'); for (var i = 0; i < tasks.length; i++) { multipleTasks.processingMultiple = true; this._drawTimeLineForRecord(table, tasks[i], multipleTasks); } } else { this._drawTimeLineForRecord(table, taskID, multipleTasks); } }, _drawTimeLineForRecord: function (table, taskID, multipleTasks) { this.scopeName = \"x_milte_timedetail_\"; try { gs.info(\"table: \" + table + \" taskID: \" + taskID); var gr = new GlideRecord(table); if (gr.get(taskID)) { var ticketNumber = \"\"; if (typeof (gr.number) != \'undefined\' && !gr.number.nil()) { ticketNumber = gr.number; this.setPageTitle(\" Timeline details for \" + ticketNumber); } else if (typeof (gr.name) != \'undefined\' && !gr.name.nil()) { this.setPageTitle(\" Timeline details for \" + String(gr.name)); ticketNumber = String(gr.name); } else { this.setPageTitle(\" Timeline details for \" + String(gr.sys_id)); ticketNumber = String(gr.sys_id); } if (!gs.nil(multipleTasks)) { if (multipleTasks.processingMultiple) { multipleTasks.ticketNumbers.push(ticketNumber); } if (multipleTasks.ticketNumbers.length > 1) { this.setPageTitle(\" Timeline details for \" + multipleTasks.ticketNumbers.toString()); } } var ticket = new global.GlideTimelineItem(ticketNumber); ticket.setLeftLabelText(ticketNumber); ticket.setImage(\'../images/icons/all.gifx\'); ticket.setTextBold(true); var snapshotTable = this._getSnapshotTable(table); var startTimeObj = this._getEarliestStartTime(gr, table, snapshotTable); var startTime = startTimeObj.startTime; var endTimeObj = this._getLatestEndTime(gr, table, snapshotTable); var endTime = endTimeObj.endTime; var duration = new GlideDuration(); var startDT = startTimeObj.startTimeDTO; var endDT = endTimeObj.endTimeDTO; if (!endTimeObj.useCurrentTime) { duration = GlideDateTime.subtract(startDT, endDT); } else { var currentEndTime = new GlideDateTime(gs.nowNoTZ()); duration = GlideDateTime.subtract(startDT, currentEndTime); } var dur = duration.getDisplayValue(); ticketSpan = ticket.createTimelineSpan(table, gr.sys_id); ticketSpan.setTimeSpan(startTime, endTime); ticketSpan.setSpanText(dur); ticketSpan.setTooltip(this._generateTopToolTip(gr, table, startTimeObj.startTimeDTO.getDisplayValue(), endTimeObj.endTimeDTO.getDisplayValue(), dur, false, false, endTimeObj.useCurrentTime)); ticketSpan.setSpanColor(\"#F5DEB3\"); this.add(ticket); this._generateSpannedItems(gr, ticketNumber, table, snapshotTable); } } catch (err) { gs.log(\'Error: \' + err.message, \'lifeg\'); } }, _generateSpannedItems: function (gr, ticketNumber, sourceTable, snapshotTable) { var hArray = []; var ganttFields = new GlideRecord(\'x_milte_timedetail_gantt_field\'); ganttFields.addQuery(\'snapshot_definition.source_table.name\', sourceTable); ganttFields.orderBy(\'order\'); ganttFields.query(); while (ganttFields.next()) { var isTrigger = this._isTriggerField(sourceTable, String(ganttFields.field.element)); var useAsLabel = false; if (ganttFields.type == \'tree_only\' || ganttFields.type == \'tree___tooltip\') { useAsLabel = true; } hArray.push({ name: String(ganttFields.field.element), table: String(ganttFields.field.name), isTrigger: isTrigger, label: useAsLabel }); } var hierarchy = []; hierarchy = this._createHierarchy(hArray); this._generateLabels(hierarchy, sourceTable, snapshotTable, gr); }, _isTriggerField: function (sourceTable, fieldName) { var result = false; var count = new GlideAggregate(\'x_milte_timedetail_snapshot_trigger\'); count.addQuery(\'snapshot_definition.source_table.name\', sourceTable); count.addQuery(\'trigger_field.element\', fieldName); count.addAggregate(\'COUNT\'); count.query(); var records = 0; if (count.next()) { records = count.getAggregate(\'COUNT\'); } if (records > 0) { result = true; } return result; }, _getDurationColor: function (dur) { if (dur.indexOf(\'Month\') > -1) { return \"#DC143C\"; } else if (dur.indexOf(\'Week\') > -1) { return \"#008000\"; } else if (dur.indexOf(\'Day\') > -1) { return \"#800080\"; } else if (dur.indexOf(\'Hour\') > -1) { return \"#0000FF\"; } else if (dur.indexOf(\'Minute\') > -1) { return \"#ff9416\"; } else { return \"#FFD700\"; } }, _getEarliestStartTime: function (ticket, sourceTable, snapshotTable) { var startTimeObj = { startTime: 0 }; var gr = new GlideRecord(\'task_sla\'); var query = \"task.sys_class_name=\" + snapshotTable + \"^task.ref_\" + snapshotTable + \".\" + this.scopeName + \"_\" + sourceTable + \".sys_id=\" + String(ticket.sys_id); gs.info(\"early query: \" + query); gr.addEncodedQuery(query); gr.orderBy(\'start_time\'); gr.query(); if (gr.next()) { startTimeObj.startTime = gr.getElement(\'start_time\').getGlideObject().getNumericValue(); startTimeObj.startTimeDTO = gr.getElement(\'start_time\').getGlideObject(); } return startTimeObj; }, _getLatestEndTime: function (ticket, sourceTable, snapshotTable) { var endTimeObj = { endTime: 0, useCurrentTime: false }; var gr = new GlideRecord(\'task_sla\'); var query = \"task.sys_class_name=\" + snapshotTable + \"^task.ref_\" + snapshotTable + \".\" + this.scopeName + \"_\" + sourceTable + \".sys_id=\" + String(ticket.sys_id); gr.addEncodedQuery(query); gr.orderByDesc(\'start_time\'); gr.query(); if (gr.next()) { endTimeObj.endTime = gr.getElement(\'end_time\').getGlideObject().getNumericValue(); if (gr.end_time.nil()) { endTimeObj.endTime = (new GlideDateTime(gs.nowNoTZ())).getNumericValue(); endTimeObj.useCurrentTime = true; } endTimeObj.endTimeDTO = gr.getElement(\'end_time\').getGlideObject(); } return endTimeObj; }, _generateTopToolTip: function (gr, sourceTable, slaStart, slaEnd, slaDur, showStartTrigger, showStopTrigger, useCurrentDur) { var tt = \'<div style=\"padding:2px;\"><div style=\"font-size:10pt;border-bottom:1px solid #ccc;padding-bottom:5px;\">\'; var ganttFields = new GlideRecord(\'x_milte_timedetail_gantt_field\'); ganttFields.addQuery(\'snapshot_definition.source_table.name\', sourceTable); ganttFields.addQuery(\'type\', \'IN\', \'tree___tooltip,tooltip_only\'); ganttFields.orderByDesc(\'title_field\'); ganttFields.orderBy(\'order\'); ganttFields.query(); while (ganttFields.next()) { if (ganttFields.title_field) { tt += \'<strong><font color=blue>\' + global.StringUtil.escapeHTML(gr[ganttFields.field.element]) + \'</font></strong><br />\'; tt += \'</div>\'; tt += \'<div style=\"padding-top:5px;\">\'; } else { var displayValue = global.StringUtil.escapeHTML(gr[ganttFields.field.element].getDisplayValue()); if (gs.nil(displayValue) || displayValue == \'\') { displayValue = \'Not Set\'; } if (this._isTriggerField(sourceTable, String(ganttFields.field.element))) { tt += \'<img src=\"T.png\" width=\"15\" height=\"15\" style=\"opacity:0.4;margin-right:5px;\"/><strong>\' + ganttFields.field.column_label + \': </strong><font color=blue>\' + displayValue + \'</font><br/>\'; } else { tt += \'<strong>\' + ganttFields.field.column_label + \': </strong><font color=blue>\' + displayValue + \'</font><br/>\'; } } } tt += \"<strong>Actual Start: </strong><font color=blue>\" + slaStart + \'</font><br />\'; if (!useCurrentDur) { tt += \"<strong>Actual End: </strong><font color=blue>\" + slaEnd + \'</font><br />\'; tt += \"<strong>Total Actual Duration: </strong><font color=blue>\" + slaDur + \'</font><br />\'; } else { tt += \"<strong>Actual End: </strong><font color=blue>Not Set</font><br />\"; tt += \"<strong>Total Current Duration: </strong><font color=blue>\" + slaDur + \'</font><br />\'; } tt += \'<div style=\"padding:2px;\"><div style=\"font-size:10pt;border-bottom:1px solid #ccc;padding-bottom:4px;\"></div>\'; tt += \'<div style=\"margin-top:5px\"><img src=\"T.png\" width=\"15\" height=\"15\" style=\"opacity:0.4;margin-right:2px;margin-left:2px;\"/> = Trigger field</div>\'; tt += \'<div style=\"padding-top:4px;\">\'; tt += \'</div></div>\'; return tt; }, _generateToolTips: function (gr, sourceTable, slaStart, slaEnd, slaDur, showStartTrigger, showStopTrigger, useCurrentDur) { var createTrigger = String(gr.task.snapshot_created_trigger); var completeTrigger = String(gr.task.snapshot_completed_trigger); var tt = \'<div style=\"padding:2px;\"><div style=\"font-size:10pt;border-bottom:1px solid #ccc;padding-bottom:5px;\">\'; var ganttFields = new GlideRecord(\'x_milte_timedetail_gantt_field\'); ganttFields.addQuery(\'snapshot_definition.source_table.name\', sourceTable); ganttFields.addQuery(\'type\', \'IN\', \'tree___tooltip,tooltip_only\'); ganttFields.orderByDesc(\'title_field\'); ganttFields.orderBy(\'order\'); ganttFields.query(); while (ganttFields.next()) { if (ganttFields.title_field) { tt += \'<strong><font color=blue>\' + global.StringUtil.escapeHTML(gr.task[ganttFields.field.element]) + \'</font></strong><br />\'; tt += \'</div>\'; tt += \'<div style=\"padding-top:5px;\">\'; } else { var displayValue = global.StringUtil.escapeHTML(gr.task[ganttFields.field.element].getDisplayValue()); if (gs.nil(displayValue) || displayValue == \'\') { displayValue = \'Not Set\'; } if (this._isTriggerField(sourceTable, String(ganttFields.field.element))) { tt += \'<img src=\"T.png\" width=\"15\" height=\"15\" style=\"opacity:0.4;margin-right:5px;\"/><strong>\' + ganttFields.field.column_label + \': </strong><font color=blue>\' + displayValue + \'</font><br/>\'; } else { tt += \'<strong>\' + ganttFields.field.column_label + \': </strong><font color=blue>\' + displayValue + \'</font><br/>\'; } } } if (showStartTrigger == true) { tt += \"<strong>Start Trigger: </strong><font color=blue>\" + createTrigger + \'</font><br />\'; } if (showStopTrigger == true) { tt += \"<strong>Stop Trigger: </strong><font color=blue>\" + completeTrigger + \'</font><br />\'; } tt += \"<strong>Actual Start: </strong><font color=blue>\" + slaStart + \'</font><br />\'; if (!useCurrentDur) { tt += \"<strong>Actual End: </strong><font color=blue>\" + slaEnd + \'</font><br />\'; tt += \"<strong>Actual Duration: </strong><font color=blue>\" + slaDur + \'</font><br />\'; } else { tt += \"<strong>Actual End: </strong><font color=blue>Not Set</font><br />\"; tt += \"<strong>Current Duration: </strong><font color=blue>\" + slaDur + \'</font><br />\'; } tt += \'<div style=\"padding:2px;\"><div style=\"font-size:10pt;border-bottom:1px solid #ccc;padding-bottom:4px;\"></div>\'; tt += \'<div style=\"margin-top:5px\"><img src=\"T.png\" width=\"15\" height=\"15\" style=\"opacity:0.4;margin-right:2px;margin-left:2px;\"/> = Trigger field</div>\'; tt += \'<div style=\"padding-top:4px;\">\'; tt += \'</div></div>\'; return tt; }, inputBox: function (ticketNumber) { var table = this.getParameter(\"sysparm_timeline_table\"); var multipleTasks = { ticketNumbers: [], processingMultiple: false }; gs.info(\"inputBox - table: \" + table + \" number: \" + ticketNumber); var gr = new GlideRecord(table); gr.addQuery(\'sys_class_name\', table); gr.addQuery(\'number\', ticketNumber); gr.query(); if (gr.next()) { this._drawTimeLineForRecord(table, String(gr.sys_id), multipleTasks); return this.setDoReRenderTimeline(true); } }, _guid: function () { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + \'-\' + s4() + \'-\' + s4() + \'-\' + s4() + \'-\' + s4() + s4() + s4(); }, _generateLabels: function (hierarchy, sourceTable, snapshotTable, ticket) { var i = 0; var query = \"\"; var timeSpans = { spans: [] }; var Values = this._getTopTierValues(sourceTable, snapshotTable, ticket, hierarchy[0]); this._valConstruct(timeSpans, sourceTable, snapshotTable, ticket, Values, hierarchy, 0, null, null); timeSpans.spans.sort(this._compare); var timeSpansToAdd = []; for (var s = 0; s < timeSpans.spans.length; s++) { var timeLineEntry = new global.TimelineItem(sourceTable, timeSpans.spans[s].guid); timeLineEntry.setLeftLabelText(timeSpans.spans[s].label); timeLineEntry.setParent(ticket.number); var span = timeLineEntry.createTimelineSpan(sourceTable, timeSpans.spans[s].guid); if (timeSpans.spans[s].useTextLabel == true) { span.setSpanText(timeSpans.spans[s].textLabel); } else { span.setSpanText(timeSpans.spans[s].durationDisplay); } span.setTimeSpan(timeSpans.spans[s].startTime, timeSpans.spans[s].endTime); span.setTooltip(timeSpans.spans[s].tooltip); span.setSpanColor(timeSpans.spans[s].color); timeSpansToAdd.push(timeLineEntry); } for (var e = 0; e < timeSpansToAdd.length; e++) { this.add(timeSpansToAdd[e]); } }, _compare: function (a, b) { if (a.startTime < b.startTime) return -1; if (a.startTime > b.startTime) return 1; return 0; }, _valConstruct: function (timeSpans, sourceTable, snapshotTable, ticket, Values, hierarchy, i, label, queryPart) { for (var val = 0; val < Values.length; val++) { var valLabel = \"\"; if (!gs.nil(label)) { valLabel = label; } if (hierarchy[i].label) { if (valLabel == \"\") { var valLabel = String(Values[val].label); } else { valLabel += \' -> \' + String(Values[val].label); } } if (typeof (hierarchy[i + 1]) != \'undefined\') { var newQueryPart = \"\"; if (!gs.nil(queryPart)) { newQueryPart = queryPart; } if (String(hierarchy[i].table) == \'task\') { newQueryPart += \'^task.\' + String(hierarchy[i].name) + \'=\' + String(Values[val].name); } else { newQueryPart += \'^task.ref_\' + String(snapshotTable) + \'.\' + String(hierarchy[i].name) + \'=\' + String(Values[val].name); } var n = i + 1; var nextLevelVals = this._getTopTierValues(sourceTable, snapshotTable, ticket, hierarchy[n], newQueryPart); this._valConstruct(timeSpans, sourceTable, snapshotTable, ticket, nextLevelVals, hierarchy, n, valLabel, newQueryPart); } else { var newQueryPart = \"\"; if (!gs.nil(queryPart)) { newQueryPart = queryPart; } if (String(hierarchy[i].table) == \'task\') { newQueryPart += \'^task.\' + String(hierarchy[i].name) + \'=\' + String(Values[val].name); } else { newQueryPart += \'^task.ref_\' + String(snapshotTable) + \'.\' + String(hierarchy[i].name) + \'=\' + String(Values[val].name); } this._createTimeSpans(timeSpans, sourceTable, snapshotTable, ticket, newQueryPart, valLabel); } } }, _getTopTierValues: function (sourceTable, snapshotTable, ticket, tier, queryPart) { var orderedValues = []; var gr = new GlideRecord(\'task_sla\'); var query = \"task.sys_class_name=\" + snapshotTable + \"^task.ref_\" + snapshotTable + \".\" + this.scopeName + \"_\" + sourceTable + \".sys_id=\" + ticket.sys_id; if (!gs.nil(queryPart)) { query += queryPart; } gr.addEncodedQuery(query); gr.orderBy(\'start_time\'); gr.query(); while (gr.next()) { var valuePresent = false; for (var i = 0; i < orderedValues.length; i++) { if (orderedValues[i].name == gr.task[tier.name] || (orderedValues[i].name == \'\' && gr.task[tier.name].nil())) { valuePresent = true; } } if (valuePresent == false) { if (gr.task[tier.name].nil()) { orderedValues.push({ name: \'\', label: \'Not Set\' }); } else { orderedValues.push({ name: String(gr.task[tier.name]), label: gr.task[tier.name].getDisplayValue() }); } } } return orderedValues; }, _createTimeSpans: function (timeSpans, sourceTable, snapshotTable, ticket, queryPart, label) { var gr = new GlideRecord(\'task_sla\'); var query = \"task.sys_class_name=\" + snapshotTable + \"^task.ref_\" + snapshotTable + \".\" + this.scopeName + \"_\" + sourceTable + \".sys_id=\" + ticket.sys_id; if (!gs.nil(queryPart)) { query += queryPart; } gr.addEncodedQuery(query); gr.orderBy(\'start_time\'); gr.query(); while (gr.next()) { var startTime = gr.getElement(\'start_time\').getGlideObject().getNumericValue(); var startDisplayTime = gr.start_time.getDisplayValue(); var endTime = gr.getElement(\'end_time\').getGlideObject().getNumericValue(); var useCurrentDur = false; if (gr.end_time.nil()) { endTime = (new GlideDateTime(gs.nowNoTZ())).getNumericValue(); useCurrentDur = true; } var duration = new GlideDuration(); var startDT = gr.getElement(\'start_time\').getGlideObject(); var endDT = gr.getElement(\'end_time\').getGlideObject(); if (!useCurrentDur) { duration = GlideDateTime.subtract(startDT, endDT); } else { var currentEndTime = new GlideDateTime(gs.nowNoTZ()); duration = GlideDateTime.subtract(startDT, currentEndTime); } var dur = duration.getDisplayValue(); var endDisplayTime = gr.end_time.getDisplayValue(); var thisGuid = gr.sys_id + \'_\' + this._guid(); var snapDef = new GlideRecord(\'x_milte_timedetail_snapshot_definition\'); snapDef.addQuery(\'source_table.name\', sourceTable); snapDef.addQuery(\'snapshot_table.name\', snapshotTable); snapDef.query(); var textLabel = \"\"; var useTextLabel = false; var showStartTrigger = false; var showStopTrigger = false; if (snapDef.next()) { if (snapDef.show_span == \'text_fields\') { useTextLabel = true; var textFields = String(snapDef.span_text_fields).split(\',\'); for (var i = 0; i < textFields.length; i++) { var textFieldName = textFields[i]; var labelVal = gr.task[textFieldName].getDisplayValue(); if (gs.nil(labelVal)) { labelVal = \'Not Set\'; } if (textLabel == \"\") { textLabel = labelVal; } else { textLabel += \', \' + labelVal; } } } else if (snapDef.show_span == \'NONE\' || snapDef.show_span == \'None\' || snapDef.show_span == \'none\' || gs.nil(snapDef.show_span)) { useTextLabel = true; } if (snapDef.show_start_trigger == true) { showStartTrigger = true; } if (snapDef.show_stop_trigger == true) { showStopTrigger = true; } } var createTrigger = String(gr.task.snapshot_created_trigger); var completeTrigger = String(gr.task.snapshot_complete_trigger); var toolTip = this._generateToolTips(gr, sourceTable, startDisplayTime, endDisplayTime, dur, showStartTrigger, showStopTrigger, useCurrentDur); var color = this._getDurationColor(dur); timeSpans.spans.push({ guid: thisGuid, label: label, startTime: startTime, startDisplayTime: startDisplayTime, endTime: endTime, endDisplayTime: endDisplayTime, durationDisplay: dur, duration: duration, tooltip: toolTip, color: color, createTrigger: createTrigger, completeTrigger: completeTrigger, useTextLabel: useTextLabel, textLabel: textLabel }); } }, _createHierarchy: function (hArray) { var hierarchy = []; var higherLevelProcessed = []; try { for (var i = 0; i < hArray.length; i++) { var valueArr = []; for (var c = 0; c < hArray.length; c++) { if (hArray[c] != hArray[i]) { var hProcessed = false; for (var h = 0; h < higherLevelProcessed.length; h++) { if (higherLevelProcessed[h] == hArray[c]) { hProcessed = true; } } if (hProcessed == false) { valueArr.push(hArray[c]); higherLevelProcessed.push(hArray[i]); } } } hierarchy.push({ tier: \"level\" + i, table: hArray[i].table, name: hArray[i].name, label: hArray[i].label, values: valueArr }); } } catch (err) { gs.info(\'Error: \' + err.message); } return hierarchy; }, _getSnapshotTable: function (sourceTable) { var snapshotTableName = \"\"; var gr = new GlideRecord(\'x_milte_timedetail_snapshot_definition\'); gr.addQuery(\'source_table.name\', sourceTable); gr.query(); if (gr.next()) { snapshotTableName = String(gr.snapshot_table.name); this.scopeName = String(gr.snapshot_table.sys_scope.scope); } return snapshotTableName; } });","access":"${access}","sys_scope":"${scope}"}';
+        var gr = new GlideRecord('sys_rest_message_fn');
+        if (gr.get('974746272b746a00b41b27b436da1506')) {
+            if (gr.content != newContent) {
+                gr.content = newContent;
+                gr.update();
+            }
+        }
+    },
+
+    type: 'CreateSnapshotTable'
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-27 22:39:49</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>4178233a2bb82a00b41b27b436da1545</sys_id>
+        <sys_mod_count>13</sys_mod_count>
+        <sys_name>CreateSnapshotTable</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_include_4178233a2bb82a00b41b27b436da1545</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-08-01 01:38:55</sys_updated_on>
+    </sys_script_include>
+</record_update>

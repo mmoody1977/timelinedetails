@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_security_acl">
+    <sys_security_acl action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <admin_overrides>true</admin_overrides>
+        <advanced>false</advanced>
+        <condition/>
+        <description>Default access control on x_milte_timedetail_deleted_snapshot_table</description>
+        <name>x_milte_timedetail_deleted_snapshot_table</name>
+        <operation display_value="write">write</operation>
+        <script/>
+        <sys_class_name>sys_security_acl</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 16:01:25</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>2c675f072bbc2a00b41b27b436da15de</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_milte_timedetail_deleted_snapshot_table</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_security_acl_2c675f072bbc2a00b41b27b436da15de</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 16:01:25</sys_updated_on>
+        <type display_value="record">record</type>
+    </sys_security_acl>
+</record_update>

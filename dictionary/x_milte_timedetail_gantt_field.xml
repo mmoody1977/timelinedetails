@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="Gantt Field" max_length="40" name="x_milte_timedetail_gantt_field" type="collection">
+        <element label="Field" max_length="80" name="field" reference="sys_dictionary" reference_qual="javascript:(new x_milte_timedetail.GetSourceSnapshotTable()).getRefQual();" type="reference" use_reference_qualifier="advanced"/>
+        <element attributes="allow_references=false" dependent="snapshot_definition.target_table" dependent_on_field="snapshot_definition.target_table" display="true" label="Field" max_length="80" name="field_name" type="field_name" use_dependent_field="true"/>
+        <element label="Order" max_length="40" name="order" type="integer"/>
+        <element label="Snapshot Definition" max_length="32" name="snapshot_definition" reference="x_milte_timedetail_snapshot_definition" type="reference"/>
+        <element label="Title Field" max_length="40" name="title_field" type="boolean"/>
+        <element choice="1" default="tree___tooltip" label="Type" max_length="40" name="type" type="string">
+            <choice>
+                <element label="Tree &amp; Tooltip" sequence="0" value="tree___tooltip"/>
+                <element label="Tree Only" sequence="1" value="tree_only"/>
+                <element label="Tooltip Only" sequence="2" value="tooltip_only"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="field"/>
+        </index>
+        <index name="index2">
+            <element name="snapshot_definition"/>
+        </index>
+    </element>
+</database>

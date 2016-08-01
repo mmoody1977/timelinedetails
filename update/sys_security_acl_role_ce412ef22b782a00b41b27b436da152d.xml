@@ -4,7 +4,7 @@
         <sys_class_name>sys_security_acl_role</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-27 17:26:35</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>ce412ef22b782a00b41b27b436da152d</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>x_milte_timedetail_snapshot_definition.timeline_details_user</sys_name>

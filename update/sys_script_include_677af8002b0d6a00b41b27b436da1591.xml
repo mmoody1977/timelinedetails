@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_milte_timedetail.SnapshotTrigger</api_name>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>SnapshotTrigger</name>
+        <script><![CDATA[var SnapshotTrigger = Class.create();
+SnapshotTrigger.prototype = {
+    initialize: function () {
+    },
+    triggerHasChanged: function (sourceTable) {
+        // Returns true when a snapshot trigger field has changed for the current record
+        // gs.info("sourceTable: " + sourceTable);
+        var hasChanged = false;
+        var gr = new GlideRecord('x_milte_timedetail_snapshot_trigger');
+        gr.addQuery('snapshot_definition.source_table.name', sourceTable);
+        gr.addQuery('snapshot_definition.active', true);
+        gr.query();
+        // gs.info("Row Count: " + gr.getRowCount());
+        while (gr.next()) {
+            if (current[gr.trigger_field.element].changes()) {
+                hasChanged = true;
+            }
+        }
+        return hasChanged;
+    },
+    buildTriggers: function (sourceTable) {
+        // Constructs JSON string of all snapshot Trigger fields that have changed in the current record
+        var triggers = '{"changedFields":[';
+        var gr = new GlideRecord('x_milte_timedetail_snapshot_trigger');
+        gr.addQuery('snapshot_definition.source_table.name', sourceTable);
+        gr.addQuery('snapshot_definition.active', true);
+        gr.query();
+        while (gr.next()) {
+            var currentFieldName = String(gr.trigger_field.element);
+            if (current[currentFieldName].changes()) {
+                var currentFieldValue = current[currentFieldName];
+                currentFieldValue = (new global.JSON()).encode(String(currentFieldValue));
+                // gs.info("currentFieldValue: " + currentFieldValue);
+                var previousFieldValue = previous[currentFieldName];
+                previousFieldValue = (new global.JSON()).encode(String(previousFieldValue));
+                //currentFieldValue = new global.JSON().encode(currentFieldValue);
+                if (triggers == '{"changedFields":[') {
+                    triggers += '{"FieldName":"' + currentFieldName + '","OldValue":' + previousFieldValue + ',"NewValue":' + currentFieldValue + '}';
+                }
+                else {
+                    triggers += ',{"FieldName":"' + currentFieldName + '","OldValue":' + previousFieldValue + ',"NewValue":' + currentFieldValue + '}';
+                }
+            }
+        }
+        triggers += "]}";
+        return triggers;
+    },
+    type: 'SnapshotTrigger'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-31 07:11:09</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>677af8002b0d6a00b41b27b436da1591</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>SnapshotTrigger</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_include_677af8002b0d6a00b41b27b436da1591</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-31 07:11:09</sys_updated_on>
+    </sys_script_include>
+</record_update>

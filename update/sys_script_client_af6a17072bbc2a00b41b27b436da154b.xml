@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description>Validate new snapshot table name to ensure that it doesn't already exist.</description>
+        <field>name</field>
+        <global>true</global>
+        <messages/>
+        <name>Validate Table Name</name>
+        <order/>
+        <script><![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading || newValue == '') {
+        return;
+    }
+    var ga = new GlideAjax('x_milte_timedetail.TimelineUtil');
+    ga.addParam("sysparm_name", "tableExists");
+    ga.addParam("sysparm_table_label", g_form.getValue("name"));
+    ga.getXML(validateTable);
+    function validateTable(response) {
+        var result = response.responseXML.documentElement.getAttribute("answer");
+        // alert(result);
+        if (result == 'true') {
+            g_form.showFieldMsg('name', 'Invalid - Table name is already in use', 'error');
+            var name = String(g_form.getValue('name'));
+            var newName = name;
+            var nameArr = name.split(' ');
+            var num = parseInt(nameArr[nameArr.length - 1]);
+            //alert('newName: ' + newName);
+            //alert('num: ' + num);
+            //alert('typeof(num): ' + typeof (num));
+            if (isInt(num)) {
+                num++;
+                var firstPart = "";
+                for (var i = 0; i < nameArr.length - 1; i++) {
+                    if (firstPart == "") {
+                        firstPart += nameArr[i];
+                    }
+                    else {
+                        firstPart += " " + nameArr[i];
+                    }
+                }
+                newName = firstPart + " " + num;
+            }
+            else {
+                newName += ' ' + 1;
+            }
+            g_form.setValue('name', newName);
+        }
+        else {
+            g_form.showFieldMsg('name', 'Valid - Table name is not in use', 'Info');
+        }
+    }
+
+    function isInt(n) {
+        return Number(n) === n && n % 1 === 0;
+    }
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 16:28:26</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>af6a17072bbc2a00b41b27b436da154b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Validate Table Name</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_client_af6a17072bbc2a00b41b27b436da154b</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 16:28:26</sys_updated_on>
+        <table>x_milte_timedetail_snapshot_definition</table>
+        <type>onChange</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>

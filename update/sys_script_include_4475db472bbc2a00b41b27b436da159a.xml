@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_milte_timedetail.TimelineUtil</api_name>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>TimelineUtil</name>
+        <script><![CDATA[var TimelineUtil = Class.create();
+TimelineUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    getTableName: function () {
+        var result = "";
+        var tableSid = String(this.getParameter("sysparm_sid"));
+        var gr = new GlideRecord("sys_db_object");
+        if (gr.get(tableSid)) {
+            result = '{"table_name":"' + String(gr.name) + '","table_label":"' + String(gr.label) + '"}';
+        }
+        return result;
+    },
+
+    tableExists: function () {
+        var result = false;
+        try {
+            var tableLabel = String(this.getParameter('sysparm_table_label'));
+            var tableName = tableLabel.toLowerCase();
+            var exp = new RegExp(" ", "jg");
+            tableName = tableName.replace(exp, "_");
+            tableName = 'x_milte_timedetail_' + tableName;
+            var gr = new GlideRecord('sys_db_object');
+            gr.addQuery('name', tableName);
+            //gr.addQuery('name', 'CONTAINS', tableName);
+            //gr.addQuery('name', 'x_milte_timedetail_snapshot_table');
+            gr.query();
+            if (gr.next()) {
+                result = true;
+            }
+            if (result == false) {
+                result = this.tableExisted(tableName, tableLabel);
+            }
+        }
+        catch (err) {
+            // Error caught
+            gs.log('Error validating table ' + tableName + " | " + err.message, 'si');
+        }
+        finally {
+            return result;
+        }
+    },
+
+    tableExisted: function (tableName, tableLabel) {
+        var result = false;
+        try {
+            if (String(tableName).indexOf('x_milte_timedetail_') > -1) { }
+            else {
+                tableName = 'x_milte_timedetail_' + tableName;
+            }
+            var deletedTable = new GlideRecord('x_milte_timedetail_deleted_snapshot_table');
+            //deletedTable.addQuery('name', 'CONTAINS', tableName);
+            deletedTable.addQuery('name', tableName);
+            //deletedTable.addQuery('application', '2392c4f14fb20200ace84a318110c7c3'); // App Scope 
+            deletedTable.query();
+            // gs.info('detecting if table was deleted: ' + tableName);
+            if (deletedTable.next()) {
+                result = true;
+                // gs.info('table was previously deleted: ' + result);
+            }
+        }
+        catch (err) {
+            gs.info('Error validating if table existed: ' + err.message);
+        }
+        finally {
+            return result;
+        }
+    },
+
+    createChoices: function (sourceTable, snapshotTable) {
+        var gr = new GlideRecord('sys_choice');
+        gr.addQuery('name', sourceTable);
+        gr.query();
+        while (gr.next()) {
+            var copyChoice = new GlideRecord('sys_choice');
+            copyChoice.addQuery('name', snapshotTable);
+            copyChoice.addQuery('element', gr.element);
+            copyChoice.addQuery('value', gr.value);
+            copyChoice.query();
+            if (copyChoice.next()) { /*Value Exists*/ }
+            else {
+                copyChoice.initialize();
+                for (var prop in gr) {
+                    if ((String(prop).indexOf('domain') == -1 && String(prop).indexOf('sys_') > -1) || String(prop) == "parent") { }
+                    else {
+                        copyChoice[prop] = gr[prop];
+                    }
+                }
+                copyChoice.name = snapshotTable;
+                copyChoice.insert();
+            }
+        }
+    },
+
+    isTriggerField: function () {
+       // gs.log('In isTriggerField', 'si');
+        var snapshot_definition = String(this.getParameter("syparm_sd"));
+        var field = String(this.getParameter("sysparm_field"));
+        //gs.log('sd: ' + snapshot_definition, 'si');
+        //gs.log('field: ' + field, 'si');
+        var isTrigger = false;
+        var gr = new GlideRecord('x_milte_timedetail_snapshot_trigger');
+        gr.addQuery('snapshot_definition', snapshot_definition);
+        gr.addQuery('trigger_field', field);
+        gr.query();
+        if (gr.next()) {
+            isTrigger = true;
+        }
+        return isTrigger;
+    },
+
+    getSourceTable: function () {
+        var result = '';
+        var tableName = String(this.getParameter('sysparm_table_name'));
+        var gr = new GlideRecord('sys_db_object');
+        gr.addQuery('name', tableName);
+        gr.query();
+        if (gr.next()) {
+            result = String(gr.sys_id);
+        }
+        return result;
+    },
+
+    type: 'TimelineUtil'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 15:57:31</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>4475db472bbc2a00b41b27b436da159a</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>TimelineUtil</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_include_4475db472bbc2a00b41b27b436da159a</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 16:25:57</sys_updated_on>
+    </sys_script_include>
+</record_update>

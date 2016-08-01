@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_milte_timedetail_snapshot_definition</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition table="x_milte_timedetail_snapshot_definition">left_pane_fieldsVALCHANGES^ORtooltip_text_fieldsVALCHANGES^EQ<item endquery="false" field="left_pane_fields" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/>
+            <item endquery="false" field="tooltip_text_fields" goto="false" newquery="false" operator="VALCHANGES" or="true" value=""/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </filter_condition>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Remove Gantt Fields</name>
+        <order>110</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+	removeGanntFields();
+	
+    function removeGanntFields() {
+        var leftPaneFields = String(current.left_pane_fields).split(',');
+        var tooltipFields = String(current.tooltip_text_fields).split(',');
+        var titleField = String(current.tooltip_title_field);
+        var gFields = new GlideRecord('x_milte_timedetail_gantt_field');
+        gFields.addQuery('snapshot_definition', current.sys_id);
+        gFields.query();
+        while (gFields.next()) {
+            var fieldInUse = false;
+            for (var i = 0; i < leftPaneFields.length; i++) {
+                if (gFields.field_name == leftPaneFields[i]) {
+                    fieldInUse = true;
+                }
+            }
+            for (var o = 0; o < tooltipFields.length; o++) {
+                if (gFields.field_name == tooltipFields[o]) {
+                    fieldInUse = true;
+                }
+            }
+
+            if (String(gFields.field_name) == titleField) {
+                fieldInUse = true;
+            }
+            if (gFields.field == 'short_description') {
+                gs.info('short_description field in use?: ' + fieldInUse);
+            }
+            if (!fieldInUse) {
+                // Remove
+                gFields.deleteRecord();
+            }
+        }
+    }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 17:55:44</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>6fd0738b2bbc2a00b41b27b436da1547</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Remove Gantt Fields</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_6fd0738b2bbc2a00b41b27b436da1547</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-29 20:08:52</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=6fd0738b2bbc2a00b41b27b436da1547"/>
+</record_update>

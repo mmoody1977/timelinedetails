@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_rest_message_fn_param_defs">
+    <sys_rest_message_fn_param_defs action="INSERT_OR_UPDATE">
+        <name>sysparm_offset</name>
+        <order>300</order>
+        <rest_message_function display_value="get">df4746272b746a00b41b27b436da1505</rest_message_function>
+        <sys_class_name>sys_rest_message_fn_param_defs</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-29 23:29:57</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>5587cee32b746a00b41b27b436da1534</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>sysparm_offset</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_rest_message_fn_param_defs_5587cee32b746a00b41b27b436da1534</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-29 23:29:57</sys_updated_on>
+        <value>0</value>
+    </sys_rest_message_fn_param_defs>
+</record_update>

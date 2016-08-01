@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_milte_timedetail.GetSourceSnapshotTable</api_name>
+        <client_callable>false</client_callable>
+        <description>Used by Timeline Details application as advanced Reference Qualifier for Gantt Field, and Snapshot Trigger tables.</description>
+        <name>GetSourceSnapshotTable</name>
+        <script><![CDATA[var GetSourceSnapshotTable = Class.create();
+GetSourceSnapshotTable.prototype = {
+    initialize: function () {
+    },
+    getRefQual: function () {
+        var result = "name=" + current.snapshot_definition.source_table.name;
+        
+        if (this.hasSuperClass(String(current.snapshot_definition.source_table.sys_id))) {
+            result += this.getSuperClass(String(current.snapshot_definition.source_table.super_class.sys_id));
+        }
+        result += "^elementNOT LIKEsys_^ORelementLIKEdomain"; 
+        return result;
+    },
+    hasSuperClass: function(sys_id) {
+        var result = false;
+        var gr = new GlideRecord('sys_db_object');
+        if (gr.get(sys_id)) {
+            if (!gr.super_class.nil()) {
+                result = true;
+            }
+        }
+        return result;
+    },
+    getSuperClass: function(table_sid) {
+        var result = "^ORname=";
+        var gr = new GlideRecord("sys_db_object");
+        if (gr.get(table_sid)) {
+            result += String(gr.name);
+            if (!gr.super_class.nil()) {
+                result += getSuperClass(String(gr.super_class.sys_id));
+            }
+        }
+        return result;
+     },
+    type: 'GetSourceSnapshotTable'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-29 19:51:43</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>8a251d2b2b346a00b41b27b436da1540</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>GetSourceSnapshotTable</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_include_8a251d2b2b346a00b41b27b436da1540</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-29 19:51:43</sys_updated_on>
+    </sys_script_include>
+</record_update>

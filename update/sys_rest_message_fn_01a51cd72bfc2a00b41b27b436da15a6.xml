@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_rest_message_fn">
+    <sys_rest_message_fn action="INSERT_OR_UPDATE">
+        <authentication_type/>
+        <basic_auth_password/>
+        <basic_auth_profile/>
+        <basic_auth_user/>
+        <content/>
+        <function_name>delete</function_name>
+        <lock>false</lock>
+        <oauth2_profile/>
+        <protocol_name/>
+        <rest_endpoint>${instance}/api/now/table/sys_ui_related_list</rest_endpoint>
+        <rest_message display_value="sys_ui_related_list">5645d01b2bfc2a00b41b27b436da1597</rest_message>
+        <sys_class_name>sys_rest_message_fn</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 20:33:26</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>01a51cd72bfc2a00b41b27b436da15a6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>delete</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_rest_message_fn_01a51cd72bfc2a00b41b27b436da15a6</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 20:33:26</sys_updated_on>
+        <use_basic_auth>false</use_basic_auth>
+        <use_mid_server/>
+        <use_mutual_auth>false</use_mutual_auth>
+    </sys_rest_message_fn>
+</record_update>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="cmn_schedule_page">
+    <cmn_schedule_page action="INSERT_OR_UPDATE">
+        <client_script><![CDATA[// Set our page configuration 
+glideTimeline.setReadOnly(false);
+glideTimeline.showLeftPane(true);
+glideTimeline.showLeftPaneAsTree(true);
+glideTimeline.showTimelineText(true);
+glideTimeline.showDependencyLines(true);
+glideTimeline.showProjectGanttPanes(true);
+glideTimeline.groupByParent(true);
+glideTimeline.setDefaultPointIconClass('milestone');
+
+glideTimeline.showLeftPaneInputBox(true, 'Search for task ...');
+// We will define what items to display and provide a custom event handler for moving new items to the closed state
+glideTimeline.registerEvent('getItems', 'x_milte_timedetail.TaskTimeLine2');
+glideTimeline.registerEvent('inputBox', 'x_milte_timedetail.TaskTimeLine2');
+//glideTimeline.registerEvent('elementMoveY', 'IncidentTimelineScriptInclude');]]></client_script>
+        <description>Used to render the timeline details via the UI Action that triggers it.</description>
+        <header_html/>
+        <init_function/>
+        <name>TaskTimeLine</name>
+        <server_script/>
+        <sys_class_name>cmn_schedule_page</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 21:14:49</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>3d9c10db2bfc2a00b41b27b436da1509</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>TaskTimeLine</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>cmn_schedule_page_3d9c10db2bfc2a00b41b27b436da1509</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-29 19:23:33</sys_updated_on>
+        <type/>
+        <view_type>Timeline</view_type>
+    </cmn_schedule_page>
+</record_update>

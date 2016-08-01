@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_milte_timedetail.DeleteSnapshotTable</api_name>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>DeleteSnapshotTable</name>
+        <script><![CDATA[var DeleteSnapshotTable = Class.create();
+DeleteSnapshotTable.prototype = {
+    initialize: function () {
+        this.scopeName = 'x_milte_timedetail';
+        this.instanceName = gs.getProperty('glide.servlet.uri');
+        this.parser = new global.JSON();
+    },
+    deleteTable: function (tableSid) {
+        var gr = new GlideRecord('sys_db_object');
+        gs.info("Delete tableSid: " + tableSid);
+        if (gr.get(tableSid)) {
+            //gs.info("Delete - found record issuing gr.deleteRecord()");
+            //gr.deleteRecord();
+            //gs.eventQueue(this.scopeName + '.delete.table', gr, tableSid, null);
+
+            var restMessage = this.scopeName + ".sys_db_object";
+            try {
+
+                var r = new sn_ws.RESTMessageV2(restMessage, 'delete');
+                // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+                r.setStringParameter('instance', this.instanceName);
+                r.setStringParameter('sys_id', tableSid);
+                var response = r.execute();
+                var responseBody = response.getBody();
+                var httpStatus = response.getStatusCode();
+                if (httpStatus == "204") {
+                    // Success
+                }
+                else {
+                    // Error deleting record via api
+                    gs.error("Unable to delete table " + tableSid + " via " + restMessage + " API. httpStatus: " + httpStatus + " Body: " + responseBody);
+                }
+            }
+            catch (ex) {
+                gs.error("Unable to delete table " + tableSid + " via " + restMessage + " API. Exception: " + ex.message);
+            }
+
+        }
+    },
+
+    deleteSLA: function (tableName) {
+        var slaSid = this._getExistingSLA(tableName);
+        if (!gs.nil(slaSid)) {
+            var restMessage = this.scopeName + ".contract_sla";
+            try {
+
+                var r = new sn_ws.RESTMessageV2(restMessage, 'delete');
+                // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+                r.setStringParameter('instance', this.instanceName);
+                r.setStringParameter('sys_id', slaSid);
+                var response = r.execute();
+                var responseBody = response.getBody();
+                var httpStatus = response.getStatusCode();
+                if (httpStatus == "204") {
+                    // Success
+                }
+                else {
+                    // Error deleting record via api
+                    gs.error("Unable to delete SLA " + slaSid + " via " + restMessage + " API.");
+                }
+            }
+            catch (ex) {
+                gs.error("Unable to delete SLA " + slaSid + " via " + restMessage + " API. Exception: " + ex.message);
+            }
+        }
+    },
+    deleteLabels: function (tableName) {
+        var gr = new GlideRecord('sys_db_object');
+        gr.addQuery('name', this.scopeName + '_snapshot_table');
+        gr.query();
+        if (gr.next()) {
+            gs.eventQueue(this.scopeName + ".delete.labels", gr, tableName, null);
+        }
+    },
+
+    deleteChoices: function (snapshotTable) {
+
+       // gs.info("modified tablename: " + this.scopeName + "_");
+        snapshotTable = String(snapshotTable).replace(this.scopeName + "_", "");
+       // gs.info("snapshotTable: " + snapshotTable);
+        var gr = new GlideRecord('sys_db_object');
+        gr.addQuery('name', this.scopeName + '_snapshot_table');
+        gr.query();
+        if (gr.next()) {
+            // gs.eventQueue(this.scopeName + ".delete.choices", gr, snapshotTable, null);
+            var choices = this.getExistingChoices(this.scopeName + "_" + snapshotTable);
+            for (var sid in choices) {
+               // gs.info("Choice sid: " + choices[sid]);
+                this.deleteChoice(choices[sid]);
+            }
+        }
+    },
+
+    deleteChoice: function (choice) {
+        var restMessage = this.scopeName + ".sys_choice";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'delete');
+            // // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('sys_id', choice);
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            if (httpStatus == "204") {
+                // Success
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to delete choice " + choice + " via " + restMessage + " API.");
+            }
+        }
+        catch (ex) {
+            gs.error("Unable to delete choice " + choice + " Exception: " + ex.message);
+        }
+
+    },
+
+    deleteModule: function (tableName) {
+        var moduleSid = this._getExistingModule(tableName);
+
+        if (!gs.nil(moduleSid)) {
+            var restMessage = this.scopeName + ".sys_app_module";
+            try {
+                var r = new sn_ws.RESTMessageV2(restMessage, 'delete');
+                // r.setBasicAuth(this.apiUserName, this.apiPassword);
+                r.setStringParameter('instance', this.instanceName);
+                r.setStringParameter('sys_id', moduleSid);
+                var response = r.execute();
+                var responseBody = response.getBody();
+                var httpStatus = response.getStatusCode();
+                if (httpStatus == "204") {
+                    // Success
+                }
+                else {
+                    // Error deleting record via api
+                    gs.error("Unable to delete module for table " + tableName + " via " + restMessage + " API.");
+                }
+            }
+            catch (ex) {
+                gs.error("Error deleteing Module for " + tableName + " via " + restMessage + " API.");
+            }
+        }
+    },
+
+    _getExistingModule: function (tableName) {
+        var sid = "";
+        var restMessage = this.scopeName + ".sys_app_module";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'sys_id,name');
+            r.setStringParameter('query', 'application=' + this.appModule + '^name=' + tableName);
+            // application=a2fd44b54fb20200ace84a318110c7e1^name=incident_snapshot_103
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info("GET App Module httpStatus: " + httpStatus + " Response body: " + responseBody + " -- Query Parameters: " + 'application=' + this.appModule + '^name=' + tableName);
+
+            var parsed = this.parser.decode(responseBody);
+            for (var i = 0; i < parsed.result.length; i++) {
+                if (String(parsed.result[i].name).indexOf(tableName) > -1) {
+                    sid = String(parsed.result[i].sys_id);
+                }
+            }
+        }
+        catch (ex) {
+            gs.error("Error deleteing Module for " + tableName + " via " + restMessage + " API.");
+        }
+        return sid;
+    },
+
+    _getExistingSLA: function (tableName) {
+        var slaSid = "";
+        // Add Snapshot SLA
+        var restMessage = this.scopeName + ".contract_sla";
+        try {
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'name,sys_id,collection');
+            r.setStringParameter('query', 'type=Snapshot^collection=' + tableName);
+
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info("Get Existing SLA response body: " + responseBody);
+            if (httpStatus == "200") {
+                var parsed = this.parser.decode(responseBody);
+
+                if (!gs.nil(parsed)) {
+                    slaSid = String(parsed.result[0].sys_id);
+                }
+
+                // Success
+            }
+            else {
+                // Error deleting record via api
+                gs.error("Unable to get existing contract_sla: " + tableName + " via: " + restMessage + " API. HTTP Status: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            gs.error("Unable to get existing contract_sla: " + tableName + " via: " + restMessage + " API. Exception: " + ex.message);
+        }
+        gs.info("slaSid: " + slaSid);
+        return slaSid;
+    },
+
+    getExistingChoices: function (snapshotTableName) {
+        var choices = [];
+        var restMessage = this.scopeName + ".sys_choice";
+        try {
+            gs.info("GET Choices params - instance: " + this.instanceName + " | query: name=" + snapshotTableName);
+            var r = new sn_ws.RESTMessageV2(restMessage, 'get');
+            //// r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('instance', this.instanceName);
+            r.setStringParameter('fields', 'name,element,sys_id,value');
+            r.setStringParameter('query', 'name=' + snapshotTableName);
+            r.setStringParameter('offset', '0');
+            var response = r.execute();
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+            gs.info("GET Choices httpStatus: " + httpStatus);
+            //var parser = new global.JSON();
+            if (httpStatus == "200") {
+                var parsed = this.parser.decode(responseBody);
+                for (var i = 0; i < parsed.result.length; i++) {
+                    if (String(parsed.result[i].name).indexOf('snapshot') > -1) {
+                        choices.push(String(parsed.result[i].sys_id));
+                    }
+                }
+            }
+            else {
+                gs.error("Error getting sys_choices via " + restMessage + " httpStatus: " + httpStatus);
+            }
+        }
+        catch (ex) {
+            var message = ex.getMessage();
+            gs.error("Error getting sys_choices via " + restMessage + " exception: " + message);
+        }
+        gs.info("choices: " + choices.toString());
+        return choices;
+    },
+
+    type: 'DeleteSnapshotTable'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 17:42:16</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>3ec7ab4b2bbc2a00b41b27b436da15c7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DeleteSnapshotTable</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_include_3ec7ab4b2bbc2a00b41b27b436da15c7</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 17:42:16</sys_updated_on>
+    </sys_script_include>
+</record_update>

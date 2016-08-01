@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_rest_message_fn">
+    <sys_rest_message_fn action="INSERT_OR_UPDATE">
+        <authentication_type/>
+        <basic_auth_password/>
+        <basic_auth_profile/>
+        <basic_auth_user/>
+        <content>{"name":"${name}","column_label":"${column_label}","element":"${element}}","internal_type":"${internal_type}","read_only":"${read_only}","sys_scope":"${sys_scope}","default_value":"${default_value}","max_length":"${max_length}","reference":"${reference}"}</content>
+        <function_name>post</function_name>
+        <lock>true</lock>
+        <oauth2_profile/>
+        <protocol_name/>
+        <rest_endpoint>${instance}/api/now/table/sys_dictionary</rest_endpoint>
+        <rest_message display_value="sys_dictionary">c4ec0cd32bfc2a00b41b27b436da1504</rest_message>
+        <sys_class_name>sys_rest_message_fn</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 19:56:37</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>e13d4c572bfc2a00b41b27b436da150d</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>post</sys_name>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_rest_message_fn_e13d4c572bfc2a00b41b27b436da150d</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 19:57:35</sys_updated_on>
+        <use_basic_auth>false</use_basic_auth>
+        <use_mid_server/>
+        <use_mutual_auth>false</use_mutual_auth>
+    </sys_rest_message_fn>
+</record_update>

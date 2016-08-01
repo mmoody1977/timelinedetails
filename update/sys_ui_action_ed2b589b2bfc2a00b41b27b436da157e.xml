@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_ui_action">
+    <sys_ui_action action="INSERT_OR_UPDATE">
+        <action_name/>
+        <active>true</active>
+        <client>true</client>
+        <comments>Display snapshot durations on a timeline</comments>
+        <condition>!current.isNewRecord() &amp;&amp; !GlideMobileExtensions.runningTablet()</condition>
+        <form_action>true</form_action>
+        <form_button>false</form_button>
+        <form_context_menu>true</form_context_menu>
+        <form_link>true</form_link>
+        <hint/>
+        <list_action>false</list_action>
+        <list_banner_button>false</list_banner_button>
+        <list_button>false</list_button>
+        <list_choice>false</list_choice>
+        <list_context_menu>false</list_context_menu>
+        <list_link>false</list_link>
+        <list_save_with_form_button>false</list_save_with_form_button>
+        <name>Timeline Details</name>
+        <onclick>showTimelineDetails()</onclick>
+        <order>140</order>
+        <script><![CDATA[function showTimelineDetails() {
+    var sysId = gel('sys_uniqueValue').value;
+    //alert("sysId: " + sysId);
+    var box = new GlideBox({
+        // sysparm_page_schedule_type=task_time_line&sysparm_timeline_task_id=d71da88ac0a801670061eabfe4b28f77&sysparm_timeline_table=incident
+        iframe: 'show_schedule_page.do?sysparm_page_schedule_type=task_time_line&sysparm_timeline_task_id=' + sysId + "&sysparm_timeline_table=" + g_form.getTableName(),
+        width: '95%',
+        height: 500,
+        title: "Timeline Details",
+        noTitle: true
+    });
+    box.render();
+
+    var g_timelineResizer;
+    Event.observe(window, 'resize', function () {
+        g_timelineResizer = setTimeout(function () {
+            box.autoPosition();
+            box.autoDimension();
+        }, 50);
+    });
+
+    //box.getBoxElement().select('.gb_table .gb_toolbar')[0].remove();
+
+    /* Test code to load in new window instead of glide box
+    var url = new GlideURL('show_schedule_page.do');
+        url.addParam('sysparm_page_schedule_type', 'metrics_timeline');
+        url.addParam('sysparm_timeline_table', 'incident');
+        url.addParam('sysparm_timeline_id', sysId);
+    
+        var w = getTopWindow();
+        var newWindow = w.open(url.getURL(), "_blank");
+        newWindow.focus();
+        return false;
+    */
+
+}]]></script>
+        <show_insert>false</show_insert>
+        <show_multiple_update>false</show_multiple_update>
+        <show_query>false</show_query>
+        <show_update>true</show_update>
+        <sys_class_name>sys_ui_action</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 21:00:15</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>ed2b589b2bfc2a00b41b27b436da157e</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Timeline Details</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_ui_action_ed2b589b2bfc2a00b41b27b436da157e</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 21:00:40</sys_updated_on>
+        <table>task</table>
+        <ui11_compatible>true</ui11_compatible>
+        <ui16_compatible>false</ui16_compatible>
+    </sys_ui_action>
+</record_update>

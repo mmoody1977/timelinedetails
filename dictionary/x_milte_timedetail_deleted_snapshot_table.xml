@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="Deleted Snapshot Table" max_length="40" name="x_milte_timedetail_deleted_snapshot_table" type="collection">
+        <element label="Label" max_length="40" name="label" type="string"/>
+        <element label="Name" max_length="40" name="name" type="string"/>
+    </element>
+</database>

@@ -51,8 +51,8 @@
         <sys_class_name>sys_dictionary</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-27 17:26:32</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
-        <sys_id>1110e63e2b382a00b41b27b436da151f</sys_id>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>88b0c5c42b0d6a00b41b27b436da1556</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>Show stop trigger</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
@@ -60,8 +60,8 @@
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_dictionary_x_milte_timedetail_snapshot_definition_show_stop_trigger</sys_update_name>
-        <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-07-27 17:26:32</sys_updated_on>
+        <sys_updated_by>system</sys_updated_by>
+        <sys_updated_on>2016-07-31 07:37:01</sys_updated_on>
         <table_reference>false</table_reference>
         <text_index>false</text_index>
         <unique>false</unique>

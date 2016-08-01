@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="Snapshot Trigger" max_length="40" name="x_milte_timedetail_snapshot_trigger" type="collection">
+        <element attributes="allow_references=false" dependent="snapshot_definition.target_table" dependent_on_field="snapshot_definition.target_table" display="true" label="Field" max_length="80" name="field_name" type="field_name" use_dependent_field="true"/>
+        <element label="Snapshot Definition" max_length="32" name="snapshot_definition" reference="x_milte_timedetail_snapshot_definition" type="reference"/>
+        <element attributes="allow_references=false" label="Trigger Field" max_length="80" name="trigger_field" reference="sys_dictionary" reference_qual="javascript:(new x_milte_timedetail.GetSourceSnapshotTable()).getRefQual();" type="reference" use_reference_qualifier="advanced"/>
+        <index name="index">
+            <element name="snapshot_definition"/>
+        </index>
+        <index name="index2">
+            <element name="trigger_field"/>
+        </index>
+    </element>
+</database>

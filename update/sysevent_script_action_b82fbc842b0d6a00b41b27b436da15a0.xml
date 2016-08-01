@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sysevent_script_action">
+    <sysevent_script_action action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition_script/>
+        <description/>
+        <event_name>x_milte_timedetail.snapshot.triggered</event_name>
+        <name>Create Snapshot Record</name>
+        <order>100</order>
+        <script><![CDATA[// Build Snapshot Trigger Message
+createSnapshotRecord();
+function createSnapshotRecord() {
+    //gs.info("In Snapshot Script Action!");
+    var snapshotTriggerArray = [];
+    var oldVal, newVal;
+    var currentRecord = String(event.parm1);
+    var snapshotTrigger = String(event.parm2);
+
+    var snapshotTable = getSnapshotTableName();
+    //gs.info("snapshotTrigger: " + snapshotTrigger + " snapshotTable: " + snapshotTable);
+    completeExistingSnapshots(snapshotTrigger, snapshotTable, currentRecord);
+    createNewSnapshot(snapshotTrigger, snapshotTable, currentRecord);
+}
+
+function completeExistingSnapshots(snapshotTrigger, snapshotTable, currentRecord) {
+    var parsed = (new global.JSON()).decode(currentRecord);
+    var ss = new GlideRecord(snapshotTable);
+    ss.addQuery(current.getTableName(), String(current.sys_id));
+    ss.addQuery('x_milte_timedetail_snapshot_sla_complete', false);
+    ss.addQuery('number', String(parsed.number));
+    ss.query();
+    while (ss.next()) {
+        ss.x_milte_timedetail_snapshot_sla_complete = true;
+        ss.x_milte_timedetail_snapshot_completed_trigger = snapshotTrigger;
+        ss.update();
+        var gr = (new x_milte_timedetail.CreateSnapshotTable()).updateSLACalculation(String(ss.sys_id), event);
+        runSLACalculation(gr);
+    }
+}
+
+function createNewSnapshot(snapshotTrigger, snapshotTable, currentRecord) {
+    //gs.info("creating new Snapshot!!");
+    var parsed = (new global.JSON()).decode(currentRecord);
+    //if (typeof (parsed.active) != 'undefined' && parsed.active == true) {
+    if (snapshotTable != "") {
+        var ss = new GlideRecord(snapshotTable);
+        ss.initialize();
+        // gs.info("initialized");
+        for (var propName in parsed) {
+            if (propName) {
+                if ((String(propName).indexOf('domain') == -1 && String(propName).indexOf('sys_') > -1) || String(propName) == "parent") { }
+                else {
+                    try {
+                        //gs.info("setting property: " + propName);
+                        ss[propName] = parsed[propName];
+                    }
+                    catch (err) {
+                        gs.info("Error setting snapshot field value: " + err.message + ' propName: ' + propName);
+                    }
+                }
+            }
+        }
+        // Set custom Snapshot Fields
+        try {
+            ss["x_milte_timedetail_" + current.getTableName()] = parsed.sys_id;
+            ss.x_milte_timedetail_snapshot_created_trigger = snapshotTrigger;
+            ss.x_milte_timedetail_snapshot_triggered_at = event.sys_created_on;
+            //gs.info("Set custom Properties");
+        }
+        catch (err) {
+            gs.info("Error setting custom snapshot field: " + err.message);
+        }
+        ss.insert();
+    }
+    //}
+}
+
+
+function getSnapshotTableName() {
+    var snapshotTable = "";
+    var ssTable = new GlideRecord('x_milte_timedetail_snapshot_definition');
+    ssTable.addQuery('source_table.name', current.getTableName());
+    ssTable.addQuery('active', true);
+    ssTable.query();
+    if (ssTable.next()) {
+        snapshotTable = ssTable.snapshot_table.name;
+    }
+    return snapshotTable;
+}
+
+
+function runSLACalculation(gr) {
+    //If the SLA has already ended, set now to the end time so the calculation doesn't get messed up
+    //gs.info('typeof(gr): ' + typeof (gr));
+    if (!gr.end_time.nil()) {
+        //gs.info('typeof(SLACalculatorNG:): ' + typeof (SLACalculatorNG));
+        global.SLACalculatorNG.calculateSLA(gr, /* skipUpdate */ false, gr.end_time);
+    }
+    else {
+        global.SLACalculatorNG.calculateSLA(gr, /* skupUpdate */ false);
+    }
+}]]></script>
+        <synchronous>false</synchronous>
+        <sys_class_name>sysevent_script_action</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-31 07:31:34</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>b82fbc842b0d6a00b41b27b436da15a0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Create Snapshot Record</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sysevent_script_action_b82fbc842b0d6a00b41b27b436da15a0</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-31 07:31:34</sys_updated_on>
+    </sysevent_script_action>
+</record_update>

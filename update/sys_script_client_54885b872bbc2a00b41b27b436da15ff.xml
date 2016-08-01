@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description>Sets the snapshot table name to ensure it doesn't conflict with an existing table in the system. If name is empty it uses the label of the source table.</description>
+        <field>source_table</field>
+        <global>true</global>
+        <messages/>
+        <name>Set Snapshot Table Name</name>
+        <order/>
+        <script><![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading || newValue == '') {
+        return;
+    }
+
+    //Type appropriate comment here, and begin script below
+    //alert(g_form.getValue('source_table'));
+    //alert(newValue);
+    var ga = new GlideAjax('x_milte_timedetail.TimelineUtil');
+    ga.addParam("sysparm_name", "getTableName");
+    ga.addParam("sysparm_sid", g_form.getValue('source_table'));
+    ga.getXML(setName);
+    function setName(response) {
+        var value = response.responseXML.documentElement.getAttribute("answer");
+        //alert(value);
+        var jsonObj = JSON.parse(value);
+        var currentTableLabelArr = String(jsonObj.table_label).split(' ');
+        var i = 0;
+        while (i <= currentTableLabelArr[currentTableLabelArr.length]) {
+            i++;
+        }
+        //var snapshotTableName = jsonObj.table_label + " Snapshot";
+        var snapshotTableName = "";
+        if (String(jsonObj.table_label).indexOf('Snapshot') == -1) {
+            if (i == 0) {
+                snapshotTableName = jsonObj.table_label + " Snapshot";
+            }
+            else {
+                snapshotTableName = jsonObj.table_label + " Snapshot " + i;
+            }
+        }
+        else {
+            snapshotTableName = jsonObj.table_label + i;
+        }
+        //alert(snapshotTableName);
+        // if (g_form.getValue('name') == '') {
+        g_form.setValue('name', snapshotTableName);
+        // }
+    }
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 16:09:49</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>54885b872bbc2a00b41b27b436da15ff</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Set Snapshot Table Name</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_client_54885b872bbc2a00b41b27b436da15ff</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 16:10:54</sys_updated_on>
+        <table>x_milte_timedetail_snapshot_definition</table>
+        <type>onChange</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>

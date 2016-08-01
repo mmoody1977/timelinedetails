@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description>Replicate trigger field values to the following fields:&#13;
+Tooltip text fields&#13;
+Left pane fields</description>
+        <field>trigger_fields</field>
+        <global>true</global>
+        <messages/>
+        <name>Replicate Trigger Field values</name>
+        <order/>
+        <script><![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading || newValue === '') {
+        return;
+    }
+
+    if ((g_form.getValue('tooltip_text_fields') == '' || g_form.getValue('tooltip_text_fields').indexOf(newValue) == -1) && g_form.isNewRecord()) {
+        g_form.setValue('tooltip_text_fields', newValue, newValue);
+    }
+    if ((g_form.getValue('left_pane_fields') == '' || g_form.getValue('left_pane_fields').indexOf(newValue) == -1) && g_form.isNewRecord()) {
+        g_form.setValue('left_pane_fields', newValue, newValue);
+    }
+    if (g_form.getValue('span_text_fields') == '' && g_form.isNewRecord()) {
+        g_form.setValue('span_text_fields', 'short_description', 'Short description');
+    }
+
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>mmoody</sys_created_by>
+        <sys_created_on>2016-07-28 16:14:27</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>fe0a13872bbc2a00b41b27b436da1526</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Replicate Trigger Field values</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+        <sys_update_name>sys_script_client_fe0a13872bbc2a00b41b27b436da1526</sys_update_name>
+        <sys_updated_by>mmoody</sys_updated_by>
+        <sys_updated_on>2016-07-28 16:14:27</sys_updated_on>
+        <table>x_milte_timedetail_snapshot_definition</table>
+        <type>onChange</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>
