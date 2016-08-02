@@ -14,7 +14,7 @@
         <sys_class_name>sys_rest_message</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-08-01 18:57:08</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>fca5a86c2bc1aa00b41b27b436da157c</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>sysevent_script_action</sys_name>

@@ -15,7 +15,7 @@
         <sys_class_name>sys_rest_message_fn</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-28 20:36:00</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>3a36dc1b2bfc2a00b41b27b436da1580</sys_id>
         <sys_mod_count>2</sys_mod_count>
         <sys_name>post</sys_name>

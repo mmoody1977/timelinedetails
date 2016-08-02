@@ -4,7 +4,7 @@
         <element default="true" label="Active" max_length="40" name="active" type="boolean"/>
         <element attributes="​is_multi_text=false" default="javascript: current.trigger_fields;" dependent="target_table" dependent_on_field="target_table" label="Left pane fields" max_length="80" name="left_pane_fields" type="field_list" use_dependent_field="true"/>
         <element label="Name" mandatory="true" max_length="40" name="name" type="string"/>
-        <element choice="1" default="Duration" label="Show span" max_length="40" name="show_span" type="string">
+        <element choice="1" default="duration" label="Show span" max_length="40" name="show_span" type="string">
             <choice>
                 <element label="Duration" sequence="0" value="duration"/>
                 <element label="Text fields" sequence="1" value="text_fields"/>
@@ -18,9 +18,9 @@
         <element label="Source Table" max_length="32" name="source_table" reference="sys_db_object" reference_qual="javascript:(new x_milte_timedetail.CreateSnapshotTable()).availableSourceTables(current.getTableName());" type="reference" use_reference_qualifier="advanced"/>
         <element attributes="​is_multi_text=false" default="short_description" dependent="target_table" dependent_on_field="target_table" label="Span text fields" max_length="80" name="span_text_fields" type="field_list" use_dependent_field="true"/>
         <element label="Target Table" mandatory="true" max_length="80" name="target_table" type="table_name"/>
-        <element default="javascript: current.trigger_fields;" label="Tooltip text fields" max_length="80" name="tooltip_text_fields" type="field_list"/>
-        <element default="short_description" label="Tooltip title field" max_length="80" name="tooltip_title_field" type="field_name"/>
-        <element label="Trigger fields" mandatory="true" max_length="80" name="trigger_fields" type="field_list"/>
+        <element default="javascript: current.trigger_fields;" dependent="target_table" dependent_on_field="target_table" label="Tooltip text fields" max_length="80" name="tooltip_text_fields" type="field_list" use_dependent_field="true"/>
+        <element default="short_description" dependent="target_table" dependent_on_field="target_table" label="Tooltip title field" max_length="80" name="tooltip_title_field" type="field_name" use_dependent_field="true"/>
+        <element dependent="target_table" dependent_on_field="target_table" label="Trigger fields" mandatory="true" max_length="80" name="trigger_fields" type="field_list" use_dependent_field="true"/>
         <index name="index">
             <element name="snapshot_table"/>
         </index>
