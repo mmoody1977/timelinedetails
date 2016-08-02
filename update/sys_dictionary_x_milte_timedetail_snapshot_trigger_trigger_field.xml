@@ -52,7 +52,7 @@
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-28 19:17:21</sys_created_on>
         <sys_customer_update>false</sys_customer_update>
-        <sys_id>844eada42b45aa00b41b27b436da15f1</sys_id>
+        <sys_id>d71335a82b45aa00b41b27b436da153e</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>Trigger Field</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
@@ -61,7 +61,7 @@
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_dictionary_x_milte_timedetail_snapshot_trigger_trigger_field</sys_update_name>
         <sys_updated_by>system</sys_updated_by>
-        <sys_updated_on>2016-08-02 00:13:11</sys_updated_on>
+        <sys_updated_on>2016-08-02 00:34:26</sys_updated_on>
         <table_reference>false</table_reference>
         <text_index>false</text_index>
         <unique>false</unique>
