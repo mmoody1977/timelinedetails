@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <record_update table="sys_rest_message_fn">
     <sys_rest_message_fn action="INSERT_OR_UPDATE">
-        <authentication_type/>
+        <authentication_type>basic_simple</authentication_type>
         <basic_auth_password>rTyMgGtzZXF7MaSa+EyjGA==</basic_auth_password>
-        <basic_auth_profile display_value="x_milte_timedetail_api">388a0e672b746a00b41b27b436da1552</basic_auth_profile>
+        <basic_auth_profile/>
         <basic_auth_user>x_milte_timedetail_api</basic_auth_user>
         <content/>
-        <function_name>get</function_name>
+        <function_name>put</function_name>
         <lock>false</lock>
         <oauth2_profile/>
         <protocol_name/>
-        <rest_endpoint>${instance}/api/now/table/sys_script_include</rest_endpoint>
-        <rest_message display_value="sys_script_include">4e0706272b746a00b41b27b436da15e0</rest_message>
+        <rest_endpoint>${instance}/api/now/table/sysevent_script_action</rest_endpoint>
+        <rest_message display_value="sysevent_script_action">fca5a86c2bc1aa00b41b27b436da157c</rest_message>
         <sys_class_name>sys_rest_message_fn</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
-        <sys_created_on>2016-07-29 23:28:31</sys_created_on>
-        <sys_customer_update>false</sys_customer_update>
-        <sys_id>df4746272b746a00b41b27b436da1505</sys_id>
-        <sys_mod_count>3</sys_mod_count>
-        <sys_name>get</sys_name>
+        <sys_created_on>2016-08-01 18:57:08</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>9df564602b05aa00b41b27b436da155d</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>put</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy/>
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
-        <sys_update_name>sys_rest_message_fn_df4746272b746a00b41b27b436da1505</sys_update_name>
+        <sys_update_name>sys_rest_message_fn_9df564602b05aa00b41b27b436da155d</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-02 00:31:25</sys_updated_on>
-        <use_basic_auth>false</use_basic_auth>
+        <sys_updated_on>2016-08-01 23:52:02</sys_updated_on>
+        <use_basic_auth>true</use_basic_auth>
         <use_mid_server/>
         <use_mutual_auth>false</use_mutual_auth>
     </sys_rest_message_fn>
