@@ -282,7 +282,8 @@ createAPIAccount: function () {
             r.setStringParameter('super_class', this.baseTaskTable);
             r.setStringParameter('label', tableLabel);
             r.setStringParameter('name', tableName);
-            var roleSid = this.createTableRole(tableName + "_admin", tableName);
+            //var roleSid = this.createTableRole(tableName + "_admin", tableName);
+            var roleSid = this._createTableRole(tableName + "_admin", tableName);
             // gs.info('user_role: ' + roleSid);
             r.setStringParameter('user_role', roleSid);
             var response = r.execute();
@@ -528,6 +529,40 @@ createAPIAccount: function () {
             gs.error(err.message);
         }
         return roleSid;
+    },
+
+    _createTableRole: function (role, tableName) {
+        var roleSid = "";
+        try {
+            var restMessage = this.scopeName + ".sys_user_role";
+            var r = new sn_ws.RESTMessageV2(restMessage, 'post');
+            // r.setBasicAuth(this.apiUserName, this.apiPassword);
+            r.setStringParameter('name', role);
+            r.setStringParameter('description', "Auto generated Admin role for snapshot table: " + tableName);
+            r.setStringParameter('sys_scope', this.scope);           
+            r.setStringParameter('instance', this.instanceName);
+            var response = r.execute();
+            var k = 1;
+            while (response == null) {
+                response = r.getResponse(1000);
+                k++;
+                if (k > 300) {
+                    break;
+                }
+            }
+            var responseBody = response.getBody();
+            var httpStatus = response.getStatusCode();
+
+            var parsed = this.parser.decode(responseBody);
+            roleSid = parsed.result.sys_id;
+
+        }
+        catch (ex) {
+            gs.info(ex.message);
+        }
+        finally {
+            return roleSid;
+        }
     },
 
     grantTableRole: function (roleId, userId) {
@@ -1694,7 +1729,7 @@ createAPIAccount: function () {
         <sys_created_on>2016-07-27 22:39:49</sys_created_on>
         <sys_customer_update>true</sys_customer_update>
         <sys_id>4178233a2bb82a00b41b27b436da1545</sys_id>
-        <sys_mod_count>18</sys_mod_count>
+        <sys_mod_count>19</sys_mod_count>
         <sys_name>CreateSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -1702,6 +1737,6 @@ createAPIAccount: function () {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_4178233a2bb82a00b41b27b436da1545</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-03 15:44:11</sys_updated_on>
+        <sys_updated_on>2016-08-03 16:37:04</sys_updated_on>
     </sys_script_include>
 </record_update>
