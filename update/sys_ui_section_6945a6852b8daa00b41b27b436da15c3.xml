@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_ui_section caption="" section_id="6945a6852b8daa00b41b27b436da15c3" sys_domain="global" table="x_milte_timedetail_gantt_field" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>0</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>7a0662492b8daa00b41b27b436da150c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>snapshot_definition</element>
+            <position>1</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>fa0662492b8daa00b41b27b436da150c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>field</element>
+            <position>2</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>7e0662492b8daa00b41b27b436da150c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>order</element>
+            <position>3</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>fe0662492b8daa00b41b27b436da150c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>4</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>720662492b8daa00b41b27b436da150d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>snapshot_definition.target_table</element>
+            <position>5</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>f20662492b8daa00b41b27b436da150d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>field_name</element>
+            <position>6</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>760662492b8daa00b41b27b436da150d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>title_field</element>
+            <position>7</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>f60662492b8daa00b41b27b436da150d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>type</element>
+            <position>8</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>7a0662492b8daa00b41b27b436da150d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>9</position>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:33:42</sys_created_on>
+            <sys_id>fa0662492b8daa00b41b27b436da150d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_milte_timedetail_gantt_field" sys_domain="global" view="Default view">6945a6852b8daa00b41b27b436da15c3</sys_ui_section>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:33:42</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption/>
+            <header>false</header>
+            <name>x_milte_timedetail_gantt_field</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:30:21</sys_created_on>
+            <sys_customer_update>true</sys_customer_update>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>6945a6852b8daa00b41b27b436da15c3</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_milte_timedetail_gantt_field</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+            <sys_update_name>sys_ui_section_6945a6852b8daa00b41b27b436da15c3</sys_update_name>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:30:21</sys_updated_on>
+            <sys_user/>
+            <title>true</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>
