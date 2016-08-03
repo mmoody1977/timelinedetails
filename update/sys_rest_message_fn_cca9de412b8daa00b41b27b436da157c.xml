@@ -15,7 +15,7 @@
         <sys_class_name>sys_rest_message_fn</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-08-03 16:39:27</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>cca9de412b8daa00b41b27b436da157c</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>put</sys_name>

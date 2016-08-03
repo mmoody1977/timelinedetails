@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_ui_related sys_domain="global" table="x_milte_timedetail_snapshot_definition" version="2" view="">
+        <sys_ui_related_list_entry action="INSERT_OR_UPDATE">
+            <filter/>
+            <list_id display_value="Snapshot Definition - Default view" name="x_milte_timedetail_snapshot_definition" related_list="NULL" sys_domain="global" view="Default view">c90f12852b8daa00b41b27b436da159a</list_id>
+            <order_by/>
+            <position>0</position>
+            <related_list>x_milte_timedetail_snapshot_trigger.snapshot_definition</related_list>
+            <sys_class_name>sys_ui_related_list_entry</sys_class_name>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:03:00</sys_created_on>
+            <sys_id>010f12852b8daa00b41b27b436da159b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:03:00</sys_updated_on>
+        </sys_ui_related_list_entry>
+        <sys_ui_related_list_entry action="INSERT_OR_UPDATE">
+            <filter/>
+            <list_id display_value="Snapshot Definition - Default view" name="x_milte_timedetail_snapshot_definition" related_list="NULL" sys_domain="global" view="Default view">c90f12852b8daa00b41b27b436da159a</list_id>
+            <order_by/>
+            <position>1</position>
+            <related_list>x_milte_timedetail_gantt_field.snapshot_definition</related_list>
+            <sys_class_name>sys_ui_related_list_entry</sys_class_name>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:03:00</sys_created_on>
+            <sys_id>c10f12852b8daa00b41b27b436da159b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:03:00</sys_updated_on>
+        </sys_ui_related_list_entry>
+        <sys_ui_related_list action="INSERT_OR_UPDATE">
+            <calculated_name>Snapshot Definition - Default view</calculated_name>
+            <filter/>
+            <name>x_milte_timedetail_snapshot_definition</name>
+            <order_by/>
+            <position/>
+            <related_list/>
+            <sys_class_name>sys_ui_related_list</sys_class_name>
+            <sys_created_by>mmoody</sys_created_by>
+            <sys_created_on>2016-08-03 17:03:00</sys_created_on>
+            <sys_customer_update>true</sys_customer_update>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>c90f12852b8daa00b41b27b436da159a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Snapshot Definition - Default view</sys_name>
+            <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
+            <sys_update_name>sys_ui_related_x_milte_timedetail_snapshot_definition_null</sys_update_name>
+            <sys_updated_by>mmoody</sys_updated_by>
+            <sys_updated_on>2016-08-03 17:03:00</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_related_list>
+    </sys_ui_related>
+</record_update>
