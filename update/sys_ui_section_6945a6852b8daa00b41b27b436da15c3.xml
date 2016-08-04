@@ -149,7 +149,7 @@
             <sys_class_name>sys_ui_section</sys_class_name>
             <sys_created_by>mmoody</sys_created_by>
             <sys_created_on>2016-08-03 17:30:21</sys_created_on>
-            <sys_customer_update>true</sys_customer_update>
+            <sys_customer_update>false</sys_customer_update>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
             <sys_id>6945a6852b8daa00b41b27b436da15c3</sys_id>
