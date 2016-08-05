@@ -24,7 +24,7 @@ CreateSnapshotTable.prototype = {
         this.baseTaskTable = this._getTableSid('task');
         this.instanceName = gs.getProperty('glide.servlet.uri');
         this.parser = new global.JSON();
-        this.appModule = "4e412ef22b782a00b41b27b436da1529"; // Detailed Task Timelines left-nav app module
+        this.appModule = "4ae26ea62b342a00b41b27b436da15cc"; // Detailed Task Timelines left-nav app module
         this._createTaskTimeLineSI();
         this._createGlobalScriptAction('Calculate SLA', 'x_milte_timedetail.calcsla');
     },
@@ -635,10 +635,6 @@ createAPIAccount: function () {
         }
     },
 
-
-
-
-
     createTableSLA: function (tableName, tableLabel) {
 
         gs.eventQueue(this.scopeName + ".createSnapshotSLA", null, tableName, tableLabel);
@@ -782,10 +778,6 @@ createAPIAccount: function () {
         }
         return exists;
     },
-
-
-
-
 
     createTableView: function (tableName, sourceTableName) {
         gs.eventQueue(this.scopeName + ".createTableView", null, this.scopeName + "_" + tableName, sourceTableName);
@@ -1050,7 +1042,6 @@ createAPIAccount: function () {
         this._createSectionElems(existingSectionSid, newSectionSid, mainSection, sourceTableName, tableName);
         return String(sid);
     },
-
 
     _createSectionElems: function (existingSectionSid, newSectionSid, mainSection, sourceTableName, tableName) {
         gs.info("Creating Section Elements... existingSectionSid: " + existingSectionSid + " newSectionSid: " + newSectionSid + " mainSection: " + mainSection + " sourceTableName: " + sourceTableName);
@@ -1546,8 +1537,6 @@ createAPIAccount: function () {
         return choices;
     },
 
-
-
     grantPersonalizeRole: function (userSid) {
         var gr = new GlideRecord('sys_user_has_role');
         gr.addQuery('user', userSid);
@@ -1631,9 +1620,6 @@ createAPIAccount: function () {
             global.SLACalculatorNG.calculateSLA(gr, /* skupUpdate */ false);
         }
     },
-
-
-
 
     deleteSLADefinition: function (tableName) {
         var gr = new GlideRecord('contract_sla');
@@ -1740,9 +1726,9 @@ createAPIAccount: function () {
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-27 22:39:49</sys_created_on>
-        <sys_customer_update>false</sys_customer_update>
+        <sys_customer_update>true</sys_customer_update>
         <sys_id>4178233a2bb82a00b41b27b436da1545</sys_id>
-        <sys_mod_count>20</sys_mod_count>
+        <sys_mod_count>21</sys_mod_count>
         <sys_name>CreateSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -1750,6 +1736,6 @@ createAPIAccount: function () {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_4178233a2bb82a00b41b27b436da1545</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-04 16:17:24</sys_updated_on>
+        <sys_updated_on>2016-08-05 19:09:15</sys_updated_on>
     </sys_script_include>
 </record_update>
