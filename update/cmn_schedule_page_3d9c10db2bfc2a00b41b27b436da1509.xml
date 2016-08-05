@@ -24,7 +24,7 @@ glideTimeline.registerEvent('inputBox', 'global.TaskTimeLine2');
         <sys_class_name>cmn_schedule_page</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-28 21:14:49</sys_created_on>
-        <sys_customer_update>true</sys_customer_update>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>3d9c10db2bfc2a00b41b27b436da1509</sys_id>
         <sys_mod_count>4</sys_mod_count>
         <sys_name>TaskTimeLine</sys_name>

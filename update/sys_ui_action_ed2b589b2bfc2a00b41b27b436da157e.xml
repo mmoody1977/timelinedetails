@@ -22,18 +22,13 @@
         <onclick>showTimelineDetails()</onclick>
         <order>140</order>
         <script><![CDATA[function showTimelineDetails() {
-    // var sysId = gel('sys_uniqueValue').value;
-    var listId = g_list.listID;
-    var list = GlideList2.get(listId);
-    var checked = list.getChecked();
-
-    if (!checked)
-        return;
-
+    var sysId = g_form.getUniqueValue();
+    //console.log(sysId);
+    //alert("sysId: " + sysId);
 
     var box = new GlideBox({
         // sysparm_page_schedule_type=task_time_line&sysparm_timeline_task_id=d71da88ac0a801670061eabfe4b28f77&sysparm_timeline_table=incident
-        iframe: 'show_schedule_page.do?sysparm_page_schedule_type=task_time_line&sysparm_timeline_task_id=' + checked.toString() + "&sysparm_timeline_table=" + g_list.getTableName(),
+        iframe: 'show_schedule_page.do?sysparm_page_schedule_type=task_time_line&sysparm_timeline_task_id=' + sysId + "&sysparm_timeline_table=" + g_form.getTableName(),
         width: '95%',
         height: 500,
         title: "Timeline Details",
@@ -51,9 +46,9 @@
 
     //box.getBoxElement().select('.gb_table .gb_toolbar')[0].remove();
 
-    /* Test code to load in new window instead of glide box
+    /* Test code to load in new window instead of glide box 
     var url = new GlideURL('show_schedule_page.do');
-        url.addParam('sysparm_page_schedule_type', 'metrics_timeline');
+        url.addParam('sysparm_page_schedule_type', 'task_time_line');
         url.addParam('sysparm_timeline_table', 'incident');
         url.addParam('sysparm_timeline_id', sysId);
     
@@ -75,7 +70,7 @@
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>ed2b589b2bfc2a00b41b27b436da157e</sys_id>
-        <sys_mod_count>2</sys_mod_count>
+        <sys_mod_count>3</sys_mod_count>
         <sys_name>Timeline Details</sys_name>
         <sys_overrides/>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
@@ -84,7 +79,7 @@
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_ui_action_ed2b589b2bfc2a00b41b27b436da157e</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-05 21:14:37</sys_updated_on>
+        <sys_updated_on>2016-08-05 21:31:42</sys_updated_on>
         <table>task</table>
         <ui11_compatible>true</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>
