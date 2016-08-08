@@ -10,10 +10,17 @@
         <script><![CDATA[var DeleteSnapshotTable = Class.create();
 DeleteSnapshotTable.prototype = {
     initialize: function () {
+        this.scope = '1e12c3a42be79640b41b27b436da15f2';
         this.scopeName = 'x_milte_timedetail';
         this.instanceName = gs.getProperty('glide.servlet.uri');
+        this.appModule = "4ae26ea62b342a00b41b27b436da15cc";
         this.parser = new global.JSON();
+        this.apiUserName = this.scopeName + "_api";
+        this.apiPassword = this.getRandomPassword();
+        this._validateCredentials(this.apiUserName, this.apiPassword);
+
     },
+
     deleteTable: function (tableSid) {
         var gr = new GlideRecord('sys_db_object');
         gs.info("Delete tableSid: " + tableSid);
@@ -73,6 +80,7 @@ DeleteSnapshotTable.prototype = {
             }
         }
     },
+
     deleteLabels: function (tableName) {
         var gr = new GlideRecord('sys_db_object');
         gr.addQuery('name', this.scopeName + '_snapshot_table');
@@ -181,7 +189,6 @@ DeleteSnapshotTable.prototype = {
         }
     },
 
-
     _getExistingLabels: function (tableName) {
         var existingLabels = [];
         var restMessage = this.scopeName + ".sys_documentation";
@@ -222,12 +229,12 @@ DeleteSnapshotTable.prototype = {
             // r.setBasicAuth(this.apiUserName, this.apiPassword);
             r.setStringParameter('instance', this.instanceName);
             r.setStringParameter('fields', 'sys_id,name');
-            r.setStringParameter('query', 'application=' + this.appModule + '^name=' + tableName);
+            r.setStringParameter('query', 'application.sys_id=' + this.appModule + '^name=' + tableName);
             // application=a2fd44b54fb20200ace84a318110c7e1^name=incident_snapshot_103
             var response = r.execute();
             var responseBody = response.getBody();
             var httpStatus = response.getStatusCode();
-            gs.info("GET App Module httpStatus: " + httpStatus + " Response body: " + responseBody + " -- Query Parameters: " + 'application=' + this.appModule + '^name=' + tableName);
+            //gs.info("GET App Module httpStatus: " + httpStatus + " Response body: " + responseBody + " -- Query Parameters: " + 'application.sys_id=' + this.appModule + '^name=' + tableName);
 
             var parsed = this.parser.decode(responseBody);
             for (var i = 0; i < parsed.result.length; i++) {
@@ -241,6 +248,7 @@ DeleteSnapshotTable.prototype = {
         }
         return sid;
     },
+    // application.sys_id=4ae26ea62b342a00b41b27b436da15cc^name=x_milte_timedetail_incident_snapshot_18
 
     _getExistingSLA: function (tableName) {
         var slaSid = "";
@@ -314,14 +322,79 @@ DeleteSnapshotTable.prototype = {
         return choices;
     },
 
+    /*Credential related functions*/
+
+    getRandomPassword: function () {
+        newpw = "";
+        var availablechars = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        for (var x = 0; x < 8; x++) {
+            randomNumber = Math.floor(Math.random() * availablechars.length);
+            newpw += availablechars[randomNumber];
+        }
+        // usr.user_password.setDisplayValue(newpw);
+        return newpw;
+    },
+
+    _validateCredentials: function (apiUserName, apiPassword) {
+        var gr = new GlideRecord('x_milte_timedetail_rest_credential');
+        gr.addQuery('user_name', apiUserName);
+        gr.query();
+        if (gr.next()) {
+            //var encryptedPword = gr.password;
+            //var Encrypter = new global.GlideEncrypter();
+            //this.apiPassword = Encrypter.decrypt(encryptedPword);
+            this.apiPassword = gr.password.getDecryptedValue();
+            if (!this._restPasswordMatches(this.apiPassword)) {
+                this._setRESTCreds();
+            }
+        }
+        else {
+            gr.initialize();
+            gr.name = apiUserName;
+            gr.user_name = apiUserName;
+            gr.password = apiPassword;
+            gr.applies_to = 'rest_message';
+            gr.insert();
+            this._setRESTCreds();
+        }
+    },
+
+    _restPasswordMatches: function (apiPassword) {
+        var matches = true;
+        var gr = new GlideRecord('sys_rest_message_fn');
+        var query = "sys_scope=" + this.scope;
+        gr.addEncodedQuery(query);
+        while (gr.next()) {
+            var decryptedPword = gr.basic_auth_password.getDecryptedValue();
+            if (apiPassword != decryptedPword) {
+                matches = false;
+            }
+        }
+        return matches;
+    },
+
+    _setRESTCreds: function () {
+        var gr = new GlideRecord("sys_rest_message_fn");
+        var query = "sys_scope=" + this.scope;
+        gr.addEncodedQuery(query);
+        gr.query();
+        while (gr.next()) {
+            gr.use_basic_auth = true;
+            gr.basic_auth_user = this.scopeName + "_api";
+            gr.basic_auth_password.setDisplayValue(this.apiPassword);
+            gr.update();
+        }
+    },
+
+
     type: 'DeleteSnapshotTable'
 };]]></script>
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-28 17:42:16</sys_created_on>
-        <sys_customer_update>false</sys_customer_update>
+        <sys_customer_update>true</sys_customer_update>
         <sys_id>3ec7ab4b2bbc2a00b41b27b436da15c7</sys_id>
-        <sys_mod_count>1</sys_mod_count>
+        <sys_mod_count>2</sys_mod_count>
         <sys_name>DeleteSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -329,6 +402,6 @@ DeleteSnapshotTable.prototype = {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_3ec7ab4b2bbc2a00b41b27b436da15c7</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-01 16:33:35</sys_updated_on>
+        <sys_updated_on>2016-08-08 17:16:56</sys_updated_on>
     </sys_script_include>
 </record_update>
