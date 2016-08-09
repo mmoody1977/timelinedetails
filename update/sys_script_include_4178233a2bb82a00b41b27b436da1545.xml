@@ -319,7 +319,7 @@ createAPIAccount: function () {
             this.createSnapshotColumns(tableName, sourceTableName);
             //this.createSnapshotColumns_old(tableName, sourceTableName);
             this.createTableModule(tableName, tableLabel);
-            this.createTableSLA(tableName, tableLabel);
+            this.createTableSLA(tableName, tableLabel, sourceTableName);
             //this.createDefaultTableView(tableName, sourceTableName);
             this.createTableView(tableName, sourceTableName);
             this.createChoices(sourceTableName, tableName);
@@ -635,52 +635,13 @@ createAPIAccount: function () {
         }
     },
 
-    createTableSLA: function (tableName, tableLabel) {
+    createTableSLA: function (tableName, tableLabel, sourceTableName) {
+        var tables = tableName + ',' + sourceTableName;
+        gs.eventQueue(this.scopeName + ".createSnapshotSLA", null, tables, tableLabel);
 
-        gs.eventQueue(this.scopeName + ".createSnapshotSLA", null, tableName, tableLabel);
-        /*
-        // Add Type Choice Snapshot to contract_sla 
-        var choice = new GlideRecord('sys_choice');
-        choice.addQuery('name', 'contract_sla');
-        choice.addQuery('element', 'type');
-        choice.addQuery('value', 'Snapshot');
-        choice.query();
-        if (choice.next()) { }
-        else {
-            choice.initialize();
-            choice.name = 'contract_sla';
-            choice.element = 'type';
-            choice.value = 'Snapshot';
-            choice.insert();
-        }
-        // Add Snapshot SLA
-        var gr = new GlideRecord('contract_sla');
-        gr.addQuery('type', 'Snapshot');
-        gr.addQuery('collection', tableName);
-        gr.addQuery('start_condition', 'sys_idISNOTEMPTY');
-        gr.addQuery('stop_condition', 'snapshot_sla_complete=true');
-        gr.addQuery('sys_scope', this.scope);
-        gr.query();
-        if (gr.next()) { }
-        else {
-            gr.initialize();
-            gr.type = 'Snapshot';
-            gr.collection = tableName;
-            gr.name = tableLabel;
-            gr.start_condition = 'sys_idISNOTEMPTY';
-            gr.stop_condition = 'snapshot_sla_complete=true';
-            gr.workflow = 'NULL';
-            gr.duration.setDateNumericValue(43200000000); // = '1971-05-16 00:00:00'; // 500 days current.duration.setDateNumericValue(timems);
-            gr.retroactive = true;
-            gr.set_start_to = 'snapshot_triggered_at';
-            gr.sys_scope = this.scope; // Detailed Task Timelines
-            //gr.setWorkflow(false);
-            gr.insert();
-        }
-        */
     },
 
-    createSLA: function (tableName, tableLabel) {
+    createSLA: function (tableName, tableLabel, sourceTableName) {
         // Create SLA Choice Option
         var restMessage = this.scopeName + ".sys_choice";
         if (!this._slaChoiceExists()) {
@@ -719,7 +680,8 @@ createAPIAccount: function () {
             r.setStringParameter('collection', this.scopeName + "_" + tableName);
             r.setStringParameter('name', tableLabel);
             r.setStringParameter('start_condition', 'sys_idISNOTEMPTY');
-            r.setStringParameter('stop_condition', this.scopeName + '_snapshot_sla_complete=true^EQ');
+            r.setStringParameter('stop_condition', this._getSLAStopCondition(sourceTableName));
+            //r.setStringParameter('stop_condition', this.scopeName + '_snapshot_sla_complete=true^EQ');
             r.setStringParameter('workflow', 'NULL');
             r.setStringParameter('duration', '3000-05-16 00:00:00');
             r.setStringParameter('retroactive', 'true');
@@ -740,6 +702,61 @@ createAPIAccount: function () {
 
         }
 
+    },
+
+    _getSLAStopCondition: function (tableName) {
+        var stopCondition = this.scopeName + "_snapshot_sla_complete=true";
+        var closedStates = "";
+        tableName = this.scopeName + "_" + tableName;
+        closedStates = this._getRecursiveStates(tableName);
+        var closedStateArr = [];
+        closedStateArr = closedStates.split(',');
+        if (closedStateArr.length > 0) {
+            for (var i = 0; i < closedStateArr.length; i++) {
+                stopCondition += "ORstate=" + closedStateArr[i];
+            }
+        }
+        gs.info('stopCondition: ' + stopCondition);
+        // element=state^labelLIKEclose^name=x_milte_timedetail_incident_snapshot_22
+        // assignment_group!=287ee6fea9fe198100ada7950d0b1b73^ORincident_state=6^EQ
+        return stopCondition;
+    },
+
+    _getRecursiveStates: function (tableName) {
+        var stateValues = [];
+        var stateValuesString = "";
+        while (closedStatesSearched == false) {
+            var gr = new GlideRecord('sys_choice');
+            var query = "element=state^labelLIKEclose^name=" + tableName;
+            gr.addEncodedQuery(query);
+            gr.query();
+            if (gr.getRowCount() > 0) {
+                while (gr.next()) {
+                    if (stateValues.toString().indexOf(gr.value) > -1) { }
+                    else {
+                        stateValues.push(String(gr.value));
+                    }
+                }
+            }
+            else {
+                var tbl = new GlideRecord('sys_db_object');
+                tbl.addQuery('name', tableName);
+                tbl.query();
+                if (tbl.next()) {
+                    if (!gs.nil(tbl.super_class)) {
+                        stateValuesString = this._getRecursiveStates(String(tbl.super_class.sys_id));
+                    }
+                }
+            }
+        }
+        if (stateValuesString != "") {
+            stateValuesString += "," + stateValues.toString();
+        }
+        else {
+            stateValuesString = stateValues.toString();
+        }
+
+        return stateValuesString;
     },
 
     _slaChoiceExists: function () {
@@ -1726,9 +1743,9 @@ createAPIAccount: function () {
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-27 22:39:49</sys_created_on>
-        <sys_customer_update>false</sys_customer_update>
+        <sys_customer_update>true</sys_customer_update>
         <sys_id>4178233a2bb82a00b41b27b436da1545</sys_id>
-        <sys_mod_count>21</sys_mod_count>
+        <sys_mod_count>22</sys_mod_count>
         <sys_name>CreateSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -1736,6 +1753,6 @@ createAPIAccount: function () {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_4178233a2bb82a00b41b27b436da1545</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-05 19:09:15</sys_updated_on>
+        <sys_updated_on>2016-08-09 21:07:47</sys_updated_on>
     </sys_script_include>
 </record_update>

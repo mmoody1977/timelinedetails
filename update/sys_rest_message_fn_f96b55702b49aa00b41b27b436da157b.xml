@@ -5,7 +5,7 @@
         <basic_auth_password>uBBw45dA+Wx7MaSa+EyjGA==</basic_auth_password>
         <basic_auth_profile/>
         <basic_auth_user>x_milte_timedetail_api</basic_auth_user>
-        <content>{"type":"${type}","collection":"${collection}","name":"${name}","start_condition":"${start_condition}","stop_condition":"${stop_condition}","workflow":"${workflow}","duration":"${duration}","retroactive":"${retroactive}","set_start_to":"${set_start_to}","sys_scope":"${sys_scope}"}</content>
+        <content>{"type":"${type}","collection":"${collection}","name":"${name}","start_condition":"${start_condition}","stop_condition":"${stop_condition}","workflow":"${workflow}","duration":"${duration}","retroactive":"${retroactive}","set_start_to":"${set_start_to}","sys_scope":"${sys_scope}","schedule_source":"no_schedule"}</content>
         <function_name>post</function_name>
         <lock>true</lock>
         <oauth2_profile/>
@@ -15,9 +15,9 @@
         <sys_class_name>sys_rest_message_fn</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-08-02 17:30:07</sys_created_on>
-        <sys_customer_update>false</sys_customer_update>
+        <sys_customer_update>true</sys_customer_update>
         <sys_id>f96b55702b49aa00b41b27b436da157b</sys_id>
-        <sys_mod_count>1</sys_mod_count>
+        <sys_mod_count>2</sys_mod_count>
         <sys_name>post</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy/>
@@ -25,7 +25,7 @@
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_rest_message_fn_f96b55702b49aa00b41b27b436da157b</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-02 18:25:33</sys_updated_on>
+        <sys_updated_on>2016-08-08 21:03:12</sys_updated_on>
         <use_basic_auth>true</use_basic_auth>
         <use_mid_server/>
         <use_mutual_auth>false</use_mutual_auth>
