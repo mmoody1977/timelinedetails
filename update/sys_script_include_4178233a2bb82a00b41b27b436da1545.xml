@@ -680,7 +680,7 @@ createAPIAccount: function () {
             r.setStringParameter('collection', this.scopeName + "_" + tableName);
             r.setStringParameter('name', tableLabel);
             r.setStringParameter('start_condition', 'sys_idISNOTEMPTY');
-            r.setStringParameter('stop_condition', this._getSLAStopCondition(sourceTableName));
+            r.setStringParameter('stop_condition', String(this._getSLAStopCondition(sourceTableName)));
             //r.setStringParameter('stop_condition', this.scopeName + '_snapshot_sla_complete=true^EQ');
             r.setStringParameter('workflow', 'NULL');
             r.setStringParameter('duration', '3000-05-16 00:00:00');
@@ -707,16 +707,16 @@ createAPIAccount: function () {
     _getSLAStopCondition: function (tableName) {
         var stopCondition = this.scopeName + "_snapshot_sla_complete=true";
         var closedStates = "";
-        tableName = this.scopeName + "_" + tableName;
+        //tableName = this.scopeName + "_" + tableName;
         closedStates = this._getRecursiveStates(tableName);
         var closedStateArr = [];
         closedStateArr = closedStates.split(',');
         if (closedStateArr.length > 0) {
             for (var i = 0; i < closedStateArr.length; i++) {
-                stopCondition += "ORstate=" + closedStateArr[i];
+                stopCondition += "^ORstate=" + String(closedStateArr[i]);
             }
         }
-        gs.info('stopCondition: ' + stopCondition);
+        //gs.info('stopCondition: ' + stopCondition + ' | ' + closedStateArr.toString());
         // element=state^labelLIKEclose^name=x_milte_timedetail_incident_snapshot_22
         // assignment_group!=287ee6fea9fe198100ada7950d0b1b73^ORincident_state=6^EQ
         return stopCondition;
@@ -725,37 +725,39 @@ createAPIAccount: function () {
     _getRecursiveStates: function (tableName) {
         var stateValues = [];
         var stateValuesString = "";
-        while (closedStatesSearched == false) {
-            var gr = new GlideRecord('sys_choice');
-            var query = "element=state^labelLIKEclose^name=" + tableName;
-            gr.addEncodedQuery(query);
-            gr.query();
-            if (gr.getRowCount() > 0) {
-                while (gr.next()) {
-                    if (stateValues.toString().indexOf(gr.value) > -1) { }
-                    else {
-                        stateValues.push(String(gr.value));
-                    }
-                }
-            }
-            else {
-                var tbl = new GlideRecord('sys_db_object');
-                tbl.addQuery('name', tableName);
-                tbl.query();
-                if (tbl.next()) {
-                    if (!gs.nil(tbl.super_class)) {
-                        stateValuesString = this._getRecursiveStates(String(tbl.super_class.sys_id));
-                    }
+        var gr = new GlideRecord('sys_choice');
+        var query = "element=state^labelLIKEclose^name=" + tableName;
+        gr.addEncodedQuery(query);
+        gr.query();
+        if (gr.getRowCount() > 0) {
+            while (gr.next()) {
+                if (stateValues.toString().indexOf(gr.value) > -1) { }
+                else {
+                   // gs.info('Pushing state value: ' + String(gr.value));
+                    stateValues.push(String(gr.value));
                 }
             }
         }
+        else {
+            //gs.info('Getting super_class record - tableName: ' + tableName);
+            var tbl = new GlideRecord('sys_db_object');
+            tbl.addQuery('name', tableName);
+            tbl.query();
+           // gs.info('tbl.getRowCount(): ' + tbl.getRowCount());
+            if (tbl.next()) {
+                if (!gs.nil(tbl.super_class)) {
+                    stateValuesString = this._getRecursiveStates(String(tbl.super_class.sys_id));
+                }
+            }
+        }
+
         if (stateValuesString != "") {
             stateValuesString += "," + stateValues.toString();
         }
         else {
             stateValuesString = stateValues.toString();
         }
-
+        //gs.info('stateValuesString: ' + stateValuesString);
         return stateValuesString;
     },
 
@@ -1745,7 +1747,7 @@ createAPIAccount: function () {
         <sys_created_on>2016-07-27 22:39:49</sys_created_on>
         <sys_customer_update>true</sys_customer_update>
         <sys_id>4178233a2bb82a00b41b27b436da1545</sys_id>
-        <sys_mod_count>22</sys_mod_count>
+        <sys_mod_count>23</sys_mod_count>
         <sys_name>CreateSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -1753,6 +1755,6 @@ createAPIAccount: function () {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_4178233a2bb82a00b41b27b436da1545</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-09 21:07:47</sys_updated_on>
+        <sys_updated_on>2016-08-10 18:03:48</sys_updated_on>
     </sys_script_include>
 </record_update>
