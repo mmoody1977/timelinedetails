@@ -287,7 +287,7 @@ createAPIAccount: function () {
         //tableName = "u_" + tableName;
         try {
             var api = this.scopeName + '.sys_db_object';
-            // gs.info('api: ' + api + ' instance: ' + this.instanceName + ' scope: ' + this.scope + ' super_class: ' + this.baseTaskTable + ' label: ' + tableLabel + ' name: ' + tableName);
+            gs.info('api: ' + api + ' instance: ' + this.instanceName + ' scope: ' + this.scope + ' super_class: ' + this.baseTaskTable + ' label: ' + tableLabel + ' name: ' + tableName);
             var r = new sn_ws.RESTMessageV2(api, 'post');
             //// r.setBasicAuth(this.apiUserName, this.apiPassword);
             r.setStringParameter('instance', this.instanceName);
@@ -297,8 +297,9 @@ createAPIAccount: function () {
             r.setStringParameter('name', tableName);
             //var roleSid = this.createTableRole(tableName + "_admin", tableName);
             var roleSid = this._createTableRole(tableName + "_admin", tableName);
-            // gs.info('user_role: ' + roleSid);
+            gs.info('user_role: ' + roleSid);
             r.setStringParameter('user_role', roleSid);
+
             var response = r.execute();
             var k = 1;
             while (response == null) {
@@ -733,7 +734,7 @@ createAPIAccount: function () {
             while (gr.next()) {
                 if (stateValues.toString().indexOf(gr.value) > -1) { }
                 else {
-                   // gs.info('Pushing state value: ' + String(gr.value));
+                    // gs.info('Pushing state value: ' + String(gr.value));
                     stateValues.push(String(gr.value));
                 }
             }
@@ -743,7 +744,7 @@ createAPIAccount: function () {
             var tbl = new GlideRecord('sys_db_object');
             tbl.addQuery('name', tableName);
             tbl.query();
-           // gs.info('tbl.getRowCount(): ' + tbl.getRowCount());
+            // gs.info('tbl.getRowCount(): ' + tbl.getRowCount());
             if (tbl.next()) {
                 if (!gs.nil(tbl.super_class)) {
                     stateValuesString = this._getRecursiveStates(String(tbl.super_class.sys_id));
@@ -1745,9 +1746,9 @@ createAPIAccount: function () {
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>mmoody</sys_created_by>
         <sys_created_on>2016-07-27 22:39:49</sys_created_on>
-        <sys_customer_update>false</sys_customer_update>
+        <sys_customer_update>true</sys_customer_update>
         <sys_id>4178233a2bb82a00b41b27b436da1545</sys_id>
-        <sys_mod_count>23</sys_mod_count>
+        <sys_mod_count>24</sys_mod_count>
         <sys_name>CreateSnapshotTable</sys_name>
         <sys_package display_value="Timeline Details" source="x_milte_timedetail">1e12c3a42be79640b41b27b436da15f2</sys_package>
         <sys_policy>read</sys_policy>
@@ -1755,6 +1756,6 @@ createAPIAccount: function () {
         <sys_scope display_value="Timeline Details">1e12c3a42be79640b41b27b436da15f2</sys_scope>
         <sys_update_name>sys_script_include_4178233a2bb82a00b41b27b436da1545</sys_update_name>
         <sys_updated_by>mmoody</sys_updated_by>
-        <sys_updated_on>2016-08-10 18:03:48</sys_updated_on>
+        <sys_updated_on>2016-08-10 21:11:12</sys_updated_on>
     </sys_script_include>
 </record_update>
