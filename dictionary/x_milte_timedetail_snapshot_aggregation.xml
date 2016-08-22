@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="Snapshot Aggregation" max_length="40" name="x_milte_timedetail_snapshot_aggregation" type="collection">
+        <element label="Duration" max_length="40" name="agg_duration" type="glide_duration"/>
+        <element label="Snapshot Definition" max_length="32" name="snapshot_definition" reference="x_milte_timedetail_snapshot_definition" type="reference"/>
+        <element attributes="slushbucket_ref_no_expand=true,no_sort=true" label="Snapshot List" max_length="4000" name="snapshot_list" reference="task" type="glide_list"/>
+        <element label="Task" max_length="32" name="task" reference="task" type="reference"/>
+        <element label="Task Duration" max_length="40" name="task_duration" type="glide_duration"/>
+        <index name="index">
+            <element name="task"/>
+        </index>
+        <index name="index2">
+            <element name="snapshot_definition"/>
+        </index>
+    </element>
+</database>
